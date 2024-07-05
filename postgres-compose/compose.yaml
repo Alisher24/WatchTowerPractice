@@ -1,0 +1,49 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15.1
+    environment:
+      POSTGRES_DB: "WatchTower"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "12345qwerty"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+    networks:
+    - exchanger
+
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:6.16
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "alisherb@dmdevelopment.ru"
+      PGADMIN_DEFAULT_PASSWORD: "12345qwerty"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    networks:
+      - exchanger
+
+
+networks:
+  exchanger:
+    driver: bridge
