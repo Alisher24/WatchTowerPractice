@@ -1,89 +1,108 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Diagnostics;
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.Models;
-using System.Diagnostics;
-using WatchTower.Server.BusinessLogic.Interface;
-using WatchTower.Server.DTO;
+using WatchTower.DTO;
+using WatchTower.Services;
 
-namespace ReactApp1.Server.Controllers
-{
-    [ApiController]
+namespace WatchTower.Controllers;
+
+[ApiController]
 /*    [Authorize]*/
-    [Route("stream")]
-    public class CameraController : ControllerBase
+[Route("stream")]
+public class CameraController(CameraService cameraService, ILogger<CameraController> logger)
+    : ControllerBase
+{
+    private Process? _ffmpegProcess;
+
+    [HttpPost("register-camera")]
+    public async Task<IActionResult> RegisterCamera([FromBody] CameraRegistrationDto dto)
     {
-        private readonly ICameraService _cameraService;
-        private readonly ILogger<CameraController> _logger;
-        private static Process _ffmpegProcess;
-
-        public CameraController(ICameraService cameraService, ILogger<CameraController> logger)
+        var camera = await cameraService.RegisterCameraAsync(dto);
+        if (camera.IsSuccess)
         {
-            _cameraService = cameraService;
-            _logger = logger;
+            return Ok(camera.Data);
+        }
+        return BadRequest(camera.ErrorMessage);
+    }
+
+    [HttpGet("start-stream")]
+    public IActionResult StartStream([FromQuery] string address, [FromQuery] string username, [FromQuery] string password)
+    {
+        var streamUrl = $"rtsp://{username}:{password}@{address}";
+        logger.LogInformation("Received request to start stream with URL: {StreamUrl}", streamUrl);
+
+        if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
+        {
+            logger.LogInformation("Stopping existing FFmpeg process.");
+            _ffmpegProcess.Kill();
         }
 
-        /*
-        [HttpPost("register-camera")]
-        public async Task<IActionResult> RegisterCamera([FromBody] CameraRegistrationDto dto)
+        var ffmpegPath = "C:\\Users\\katie\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.0.1-full_build\\bin\\ffmpeg.exe";
+        var arguments = $"-i {streamUrl} -f mpegts -codec:v mpeg1video pipe:1";
+        logger.LogInformation("Starting FFmpeg process with arguments: {Arguments}", arguments);
+
+        _ffmpegProcess = new Process
         {
-            var camera = await _cameraService.RegisterCameraAsync(dto);
-            if (camera.IsSuccess)
+            StartInfo = new ProcessStartInfo
             {
-                return Ok(camera);
+                FileName = ffmpegPath,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             }
-            return BadRequest(camera);
-        }*/
+        };
 
-        [HttpGet("start-stream")]
-        public IActionResult StartStream([FromQuery] string address, [FromQuery] string username, [FromQuery] string password)
+        _ffmpegProcess.Start();
+        logger.LogInformation("FFmpeg process started.");
+
+        return Ok("Stream started");
+    }
+
+    [HttpGet("stop-stream")]
+    public IActionResult StopStream()
+    {
+        if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
         {
-            var streamUrl = $"rtsp://{username}:{password}@{address}";
-            _logger.LogInformation("Received request to start stream with URL: {StreamUrl}", streamUrl);
-
-            if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
-            {
-                _logger.LogInformation("Stopping existing FFmpeg process.");
-                _ffmpegProcess.Kill();
-            }
-
-            var ffmpegPath = "C:\\Users\\katie\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.0.1-full_build\\bin\\ffmpeg.exe";
-            var arguments = $"-i {streamUrl} -f mpegts -codec:v mpeg1video pipe:1";
-            _logger.LogInformation("Starting FFmpeg process with arguments: {Arguments}", arguments);
-
-            _ffmpegProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = ffmpegPath,
-                    Arguments = arguments,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-
-            _ffmpegProcess.Start();
-            _logger.LogInformation("FFmpeg process started.");
-
-            return Ok("Stream started");
+            _ffmpegProcess.Kill();
+            logger.LogInformation("FFmpeg process stopped.");
+            return Ok("Stream stopped");
         }
 
-        [HttpGet("stop-stream")]
-        public IActionResult StopStream()
+        return BadRequest("No stream to stop.");
+    }
+
+    private Stream GetStream()
+    {
+        return _ffmpegProcess?.StandardOutput.BaseStream!;
+    }
+    
+    private async Task StreamVideo(HttpContext context, WebSocket webSocket)
+    {
+        var buffer = new byte[4096];
+        int bytesRead;
+
+        try
         {
-            if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
+            using var output = GetStream();
+
+            if (output == null)
             {
-                _ffmpegProcess.Kill();
-                _logger.LogInformation("FFmpeg process stopped.");
-                return Ok("Stream stopped");
+                context.Response.StatusCode = 500;
+                return;
             }
 
-            return BadRequest("No stream to stop.");
-        }
+            while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                if (webSocket.State != WebSocketState.Open)
+                    break;
 
-        public static Stream GetStream()
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary, true, CancellationToken.None);
+            }
+        }
+        finally
         {
-            return _ffmpegProcess?.StandardOutput.BaseStream;
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", CancellationToken.None);
         }
     }
 }

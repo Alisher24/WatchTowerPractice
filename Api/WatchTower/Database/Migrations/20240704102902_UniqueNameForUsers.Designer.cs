@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using WatchTower.Database;
 using WatchTower.Server.BusinessLogic;
 
 #nullable disable
@@ -11,8 +12,8 @@ using WatchTower.Server.BusinessLogic;
 namespace WatchTower.Server.Migrations
 {
     [DbContext(typeof(WatchTowerDbContext))]
-    [Migration("20240704100143_AddNullForDatabase")]
-    partial class AddNullForDatabase
+    [Migration("20240704102902_UniqueNameForUsers")]
+    partial class UniqueNameForUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,6 +78,9 @@ namespace WatchTower.Server.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });

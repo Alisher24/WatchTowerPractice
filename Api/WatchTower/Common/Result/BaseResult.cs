@@ -1,4 +1,4 @@
-﻿namespace WatchTower.Server.BusinessLogic.Result
+﻿namespace WatchTower.Common.Result
 {
     public class BaseResult
     {

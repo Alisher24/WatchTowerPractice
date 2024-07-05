@@ -1,23 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using WatchTower.Server.BusinessLogic.Interface;
-using WatchTower.Server.DTO;
-using WatchTower.Server.Models;
+using WatchTower.Database.Models;
+using WatchTower.DTO;
+using WatchTower.Services;
 
-namespace WatchTower.Server.Controllers
+namespace WatchTower.Controllers
 {
     [ApiController]
     [Route("auth")]
-    public class AuthController : ControllerBase
+    public class AuthController(AuthService authService) : ControllerBase
     {
-        private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
-        {
-            _authService = authService;
-        }
-
         [AllowAnonymous]
         [HttpPost ("Login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto user)
@@ -32,7 +25,7 @@ namespace WatchTower.Server.Controllers
                 return BadRequest(new { message = "Введите пароль" });
             }
 
-            User loggedInUser = await _authService.Login(user.Name, user.Password);
+            User? loggedInUser = await authService.Login(user.Name, user.Password);
 
             if (loggedInUser == null)
             {
@@ -63,9 +56,9 @@ namespace WatchTower.Server.Controllers
 
             User userToRegister = new(name: user.Name, email: user.Email, password: user.Password);
 
-            User registerUser = await _authService.Register(userToRegister);
+            User registerUser = await authService.Register(userToRegister);
 
-            User loggedInUser = await _authService.Login(registerUser.Name, user.Password);
+            User? loggedInUser = await authService.Login(registerUser.Name, user.Password);
 
             if (loggedInUser == null)
             {

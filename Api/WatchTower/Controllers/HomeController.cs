@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WatchTower.Server.BusinessLogic;
+using WatchTower.Database;
 
-namespace WatchTower.Server.Controllers
+namespace WatchTower.Controllers
 {
     [Authorize]
     public class HomeController : ControllerBase
