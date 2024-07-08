@@ -12,7 +12,7 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
 {
     public async Task<User?> Login(string name, string password)
     {
-        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == name);
+        var user = await dbContext.Users.Include(user => user.Cameras).FirstOrDefaultAsync(x => x.Name == name);
 
         if (user == null || BCrypt.Net.BCrypt.Verify(password, user.Password) == false) 
         {
@@ -26,18 +26,20 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, user.Name)
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             }),
             IssuedAt = DateTime.UtcNow,
             Issuer = configuration["JWT:Issuer"],
             Audience = configuration["JWT:Audience"],
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddDays(1),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = tokenHandler.CreateToken(tokenDescription);
         user.Token = tokenHandler.WriteToken(token);
         user.IsActive = true;
+        await dbContext.SaveChangesAsync();
 
         return user;
     }

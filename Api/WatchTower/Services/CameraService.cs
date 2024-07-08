@@ -36,20 +36,22 @@ public class CameraService(WatchTowerDbContext dbContext)
         }
     }
 
-    public async Task<BaseResult<CameraDto>> GetCameraByIpAsync(string ip)
+    public async Task<BaseResult<CameraDto>> GetCameraByIpAsync(string ip, int userId)
     {
         try
         {
             var camera = await dbContext.Cameras
-                .Select(s => new CameraDto()
-                {
-                    Ip = s.Ip,
-                    Name = s.Name,
-                    Password = s.Password
-                })
+                .Where(x => x.UserId == userId)
                 .FirstOrDefaultAsync(x => x.Ip == ip);
 
-            if (camera == null)
+            var cameraDto = new CameraDto()
+            {
+                Ip = camera.Ip,
+                Name = camera.Name,
+                Password = camera.Password
+            };
+
+            if (cameraDto == null)
             {
                 return new BaseResult<CameraDto>
                 {
@@ -59,7 +61,7 @@ public class CameraService(WatchTowerDbContext dbContext)
 
             return new BaseResult<CameraDto>()
             {
-                Data = camera
+                Data = cameraDto
             };
         }
         catch (Exception ex)
@@ -71,7 +73,7 @@ public class CameraService(WatchTowerDbContext dbContext)
         }
     }
 
-    public async Task<BaseResult<CameraDto>> RegisterCameraAsync(CameraRegistrationDto cameraDto)
+    public async Task<BaseResult<CameraDto>> RegisterCameraAsync(CameraRegistrationDto cameraDto, int userId)
     {
         try
         {
@@ -80,7 +82,7 @@ public class CameraService(WatchTowerDbContext dbContext)
                 Ip = cameraDto.Ip,
                 Name = cameraDto.Name,
                 Password = cameraDto.Password,
-                UserId = cameraDto.UserId
+                UserId = userId
             };
 
             await dbContext.AddAsync(camera);

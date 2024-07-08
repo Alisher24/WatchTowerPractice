@@ -6,7 +6,7 @@ namespace WatchTower.Services;
 
 public class StreamService(ILogger<StreamService> logger, IConfiguration configuration)
 {
-    private Process? _ffmpegProcess;
+    private static Process? _ffmpegProcess;
 
     public BaseResult<string> StartSream(string streamUrl)
     {
@@ -71,21 +71,15 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         };
     }
     
-    private async Task StreamVideo(HttpContext context, WebSocket webSocket)
+    public async Task StreamVideo(WebSocket webSocket)
     {
         var buffer = new byte[4096];
-        int bytesRead;
 
         try
         {
             await using var output = GetStream();
 
-            if (output == null)
-            {
-                context.Response.StatusCode = 500;
-                return;
-            }
-
+            int bytesRead;
             while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 if (webSocket.State != WebSocketState.Open)
@@ -100,7 +94,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         }
     }
     
-    private Stream GetStream()
+    private static Stream GetStream()
     {
         return _ffmpegProcess?.StandardOutput.BaseStream!;
     }
