@@ -1,0 +1,54 @@
+.auth {
+    background: #F2F2F2;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+.logotype {
+    margin: 0 auto;
+    margin-bottom: 25px;
+    width: 180px;
+    height: 50px;
+}
+.authForm {
+    height: 500px;
+    width: 550px;
+    background-color: white;
+    margin-top: 200px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    color: #737373
+}
+.inputWrapper {
+    width: 220px;
+    margin: 0 auto;
+}
+.inputName {
+    font-size: .7em;
+    text-align: left;
+    margin-top: 0;
+}
+input {
+    width: 220px;
+    margin: 10px auto;
+    margin-top: 5px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    height: 40px;
+}
+.signIn {
+    margin-top: 15px;
+}
+.divider {
+    margin: 10px 0 20px 0;
+}
+.signUp {
+     margin-top: 25px;
+ }
+hr {
+    margin-top: 25px;
+    border-top: 1px solid #BFBFBF;
+}
