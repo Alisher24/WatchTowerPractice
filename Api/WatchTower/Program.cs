@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using WatchTower.Database;
-using WatchTower.Server.BusinessLogic;
 using WatchTower.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +8,7 @@ builder.Services.AddDbContext<WatchTowerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<CameraService>();
 
 builder.Services.AddControllers();

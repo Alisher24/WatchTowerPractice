@@ -25,7 +25,7 @@ namespace WatchTower.Controllers
                 return BadRequest(new { message = "Введите пароль" });
             }
 
-            User? loggedInUser = await authService.Login(user.Name, user.Password);
+            var loggedInUser = await authService.Login(user.Name, user.Password);
 
             if (loggedInUser == null)
             {
@@ -56,9 +56,9 @@ namespace WatchTower.Controllers
 
             User userToRegister = new(name: user.Name, email: user.Email, password: user.Password);
 
-            User registerUser = await authService.Register(userToRegister);
+            var registerUser = await authService.Register(userToRegister);
 
-            User? loggedInUser = await authService.Login(registerUser.Name, user.Password);
+            var loggedInUser = await authService.Login(registerUser.Name, user.Password);
 
             if (loggedInUser == null)
             {
@@ -74,20 +74,15 @@ namespace WatchTower.Controllers
         {
             string token = Request.Headers["Authorization"];
 
-            if (token.StartsWith("Bearer"))
+            if (token != null && token.StartsWith("Bearer"))
             {
                 token = token.Substring("Bearer ".Length).Trim();
             }
             var handler = new JwtSecurityTokenHandler();
 
-            JwtSecurityToken jwt = handler.ReadJwtToken(token);
+            var jwt = handler.ReadJwtToken(token);
 
-            var claims = new Dictionary<string, string>();
-
-            foreach (var claim in jwt.Claims)
-            {
-                claims.Add(claim.Type, claim.Value);
-            }
+            var claims = jwt.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
 
             return Ok(claims);
         }

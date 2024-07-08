@@ -1,4 +1,5 @@
-﻿using WatchTower.Common.Result;
+﻿using Microsoft.EntityFrameworkCore;
+using WatchTower.Common.Result;
 using WatchTower.Database;
 using WatchTower.Database.Models;
 using WatchTower.DTO;
@@ -7,14 +8,11 @@ namespace WatchTower.Services;
 
 public class CameraService(WatchTowerDbContext dbContext)
 {
-    private readonly WatchTowerDbContext _dbContext = dbContext;
-
-    /*public async Task<List<CameraDto>> GetCamerasAsync(int userId)
+    public async Task<BaseResult<List<CameraDto>>> GetCamerasAsync(int userId)
     {
-        List<CameraDto> cameras;
         try
         {
-            cameras = await _cameraRepository.GetAll()
+            var cameras = await dbContext.Cameras
                 .Where(x => x.UserId == userId)
                 .Select(s => new CameraDto()
                 {
@@ -23,24 +21,26 @@ public class CameraService(WatchTowerDbContext dbContext)
                     Password = s.Password
                 })
                 .ToListAsync();
+
+            return new BaseResult<List<CameraDto>>()
+            {
+                Data = cameras
+            };
         }
         catch (Exception ex)
         {
-                
+            return new BaseResult<List<CameraDto>>()
+            {
+                ErrorMessage = ex.Message
+            };
         }
-
-        return new List<Camera>()
-        {
-                
-        };
     }
 
     public async Task<BaseResult<CameraDto>> GetCameraByIpAsync(string ip)
     {
-        CameraDto? camera;
         try
         {
-            camera = await _cameraRepository.GetAll()
+            var camera = await dbContext.Cameras
                 .Select(s => new CameraDto()
                 {
                     Ip = s.Ip,
@@ -48,6 +48,19 @@ public class CameraService(WatchTowerDbContext dbContext)
                     Password = s.Password
                 })
                 .FirstOrDefaultAsync(x => x.Ip == ip);
+
+            if (camera == null)
+            {
+                return new BaseResult<CameraDto>
+                {
+                    ErrorMessage = $"Камеры с данным ip: {ip} не существует"
+                };
+            }
+
+            return new BaseResult<CameraDto>()
+            {
+                Data = camera
+            };
         }
         catch (Exception ex)
         {
@@ -56,20 +69,7 @@ public class CameraService(WatchTowerDbContext dbContext)
                 ErrorMessage = ex.Message
             };
         }
-
-        if (camera == null)
-        {
-            return new BaseResult<CameraDto>
-            {
-                ErrorMessage = "Нет камеры"
-            };
-        }
-
-        return new BaseResult<CameraDto>
-        {
-            Data = camera
-        };
-    }*/
+    }
 
     public async Task<BaseResult<CameraDto>> RegisterCameraAsync(CameraRegistrationDto cameraDto)
     {
@@ -83,8 +83,8 @@ public class CameraService(WatchTowerDbContext dbContext)
                 UserId = cameraDto.UserId
             };
 
-            await _dbContext.AddAsync(camera);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.AddAsync(camera);
+            await dbContext.SaveChangesAsync();
 
             return new BaseResult<CameraDto>
             {
