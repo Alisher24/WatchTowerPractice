@@ -1,0 +1,18 @@
+
+.cameraList ul {
+    list-style: none;
+    padding: 0;
+}
+
+.cameraList li {
+    margin-bottom: 10px;
+}
+
+.cameraList input {
+    margin-right: 5px;
+    width: calc(100% - 70px);
+}
+
+.cameraList button {
+    margin-left: 10px;
+}

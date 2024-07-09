@@ -23,11 +23,11 @@ a:hover {
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  /*margin: 0;*/
+  /*display: flex;*/
+  /*place-items: center;*/
+  /*min-width: 320px;*/
+  /*min-height: 100vh;*/
 }
 
 h1 {
@@ -42,7 +42,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #c9c9c9;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -66,3 +66,14 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/*!* Дополним стили для кнопок и инпутов, используемых в боковой панели *!*/
+/*input, button {*/
+/*  margin-bottom: 10px; !* Отступ между элементами *!*/
+/*  width: calc(100% - 20px); !* Учитываем отступы *!*/
+/*  box-sizing: border-box; !* Обеспечиваем корректный подсчет ширины *!*/
+/*}*/
+
+/*button {*/
+/*  width: 100%; !* Кнопки растягиваются на всю ширину контейнера *!*/
+/*}*/

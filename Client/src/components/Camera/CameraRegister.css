@@ -1,0 +1,15 @@
+.cameraRegister {
+    display: flex;
+    flex-direction: column;
+}
+
+.cameraRegister input {
+
+    display: block;
+    margin-bottom: 10px;
+    width: calc(100% - 20px);
+}
+
+.cameraRegister button {
+    align-self: center;
+}

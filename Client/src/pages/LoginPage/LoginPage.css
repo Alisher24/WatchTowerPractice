@@ -1,3 +1,4 @@
+
 .auth {
     /*background: #F2F2F2;*/
     display: flex;
@@ -5,8 +6,7 @@
     height: 100vh;
 }
 .logotype {
-    margin: 0 auto;
-    margin-bottom: 25px;
+    margin: 0 auto 25px;
     width: 180px;
     height: 50px;
 }

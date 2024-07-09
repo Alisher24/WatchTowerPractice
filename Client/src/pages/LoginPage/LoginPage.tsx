@@ -12,7 +12,7 @@ const LoginPage = () => {
   const handleSubmit = () => {
     AuthService.login(username, password).then(
       () => {
-        history.push("/projects");
+        history.push("/");
       },
     ).catch((error) => {
       setLoginError(true)

@@ -2,11 +2,13 @@ import {Route, Switch} from 'react-router-dom';
 
 import LoginPage from "./pages/LoginPage/LoginPage.tsx";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage.tsx";
+import HomePage from "./pages/HomePage/HomePage.tsx";
 
 const Router = () => (
   <Switch>
-    <Route exact path="/" component={welcome}/>
-    <Route path="/auth" component={LoginPage}/>
+    <Route exact path="/" component={HomePage}/>
+    <Route exact path="/welcome" component={welcome}/>
+    <Route path="/login" component={LoginPage}/>
     <Route path="/reg" component={RegistrationPage}/>
   </Switch>
 )

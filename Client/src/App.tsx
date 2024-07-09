@@ -59,8 +59,9 @@ import Routes from './Routes';
 import Main from './components/Main/Main';
 import {BrowserRouter} from 'react-router-dom';
 import GlobalStyles from './shared/GlobalStyles';
+import React from "react";
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
       <GlobalStyles />
@@ -71,6 +72,6 @@ function App() {
       </BrowserRouter>
     </div>
   );
-}
+};
 
 export default App;
