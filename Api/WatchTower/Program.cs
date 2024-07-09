@@ -1,5 +1,7 @@
+using System.Net.WebSockets;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -95,4 +97,46 @@ app.MapControllers();
 
 app.UseWebSockets();
 
+app.Map("/stream", async context =>
+{
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        await StreamVideo(context, webSocket);
+    }
+    else
+    {
+        context.Response.StatusCode = 400;
+    }
+});
+
 app.Run();
+
+async Task StreamVideo(HttpContext context, WebSocket webSocket)
+{
+    var buffer = new byte[4096];
+    int bytesRead;
+
+    try
+    {
+        using var output = StreamService.GetStream();
+
+        if (output == null)
+        {
+            context.Response.StatusCode = 500;
+            return;
+        }
+
+        while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            if (webSocket.State != WebSocketState.Open)
+                break;
+
+            await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary, true, CancellationToken.None);
+        }
+    }
+    finally
+    {
+        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", CancellationToken.None);
+    }
+}

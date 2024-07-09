@@ -71,7 +71,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         };
     }
     
-    public async Task StreamVideo(WebSocket webSocket)
+    public static async Task StreamVideo(WebSocket webSocket)
     {
         var buffer = new byte[4096];
 
@@ -94,7 +94,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         }
     }
     
-    private static Stream GetStream()
+    public static Stream GetStream()
     {
         return _ffmpegProcess?.StandardOutput.BaseStream!;
     }

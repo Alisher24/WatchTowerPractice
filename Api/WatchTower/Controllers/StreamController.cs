@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WatchTower.DTO;
 using WatchTower.Services;
 
 namespace WatchTower.Controllers;
@@ -10,16 +11,14 @@ namespace WatchTower.Controllers;
 public class StreamController (StreamService streamService)
     : ControllerBase
 {
-    [HttpGet("start-stream")]
-    public async Task<IActionResult> StartStream([FromQuery] string address, [FromQuery] string username, [FromQuery] string password)
+    [HttpPost("start-stream")]
+    public Task<IActionResult> StartStream([FromBody] CameraDto cameraDto)
     {
-        await StreamVideo();
-            
-        var streamUrl = $"rtsp://{username}:{password}@{address}";
+        var streamUrl = $"rtsp://{cameraDto.Name}:{cameraDto.Password}@{cameraDto.Ip}";
 
         var result = streamService.StartSream(streamUrl);
 
-        return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
+        return Task.FromResult<IActionResult>(result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage));
     }
 
     [HttpGet("stop-stream")]
@@ -30,7 +29,7 @@ public class StreamController (StreamService streamService)
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
     }
     
-    private async Task StreamVideo()
+    /*public async Task StreamVideo()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
@@ -41,5 +40,5 @@ public class StreamController (StreamService streamService)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
         }
-    }
+    }*/
 }
