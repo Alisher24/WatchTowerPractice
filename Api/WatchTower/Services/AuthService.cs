@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WatchTower.Common.Result;
 using WatchTower.Database;
 using WatchTower.Database.Models;
 
@@ -10,7 +11,7 @@ namespace WatchTower.Services;
 
 public class AuthService(WatchTowerDbContext dbContext, IConfiguration configuration)
 {
-    public async Task<User?> Login(string name, string password)
+    public async Task<(string, string)?> Login(string name, string password)
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == name);
 
@@ -40,8 +41,8 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         user.Token = tokenHandler.WriteToken(token);
         user.IsActive = true;
         await dbContext.SaveChangesAsync();
-
-        return user;
+        
+        return (name, user.Token);
     }
 
     public async Task<User> Register(User user)
