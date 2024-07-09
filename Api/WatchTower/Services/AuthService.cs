@@ -6,12 +6,13 @@ using Microsoft.IdentityModel.Tokens;
 using WatchTower.Common.Result;
 using WatchTower.Database;
 using WatchTower.Database.Models;
+using WatchTower.DTO;
 
 namespace WatchTower.Services;
 
 public class AuthService(WatchTowerDbContext dbContext, IConfiguration configuration)
 {
-    public async Task<(string, string)?> Login(string name, string password)
+    public async Task<BaseResult<UserDto>?> Login(string name, string password)
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == name);
 
@@ -42,7 +43,10 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         user.IsActive = true;
         await dbContext.SaveChangesAsync();
         
-        return (name, user.Token);
+        return new BaseResult<UserDto>()
+        {
+            Data = new UserDto(user.Name, user.Token)
+        };
     }
 
     public async Task<User> Register(User user)
