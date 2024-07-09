@@ -12,7 +12,7 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
 {
     public async Task<User?> Login(string name, string password)
     {
-        var user = await dbContext.Users.Include(user => user.Cameras).FirstOrDefaultAsync(x => x.Name == name);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == name);
 
         if (user == null || BCrypt.Net.BCrypt.Verify(password, user.Password) == false) 
         {
