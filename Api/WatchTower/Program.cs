@@ -15,6 +15,17 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<CameraService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "MyConfiguration",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(opt => {
@@ -65,8 +76,6 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-// Configure CORS
-
 builder.Logging.ClearProviders();
 
 builder.Logging.AddConsole();
@@ -78,7 +87,7 @@ app.UseAuthentication();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors();
+app.UseCors("MyConfiguration");
 
 app.UseAuthorization();
 

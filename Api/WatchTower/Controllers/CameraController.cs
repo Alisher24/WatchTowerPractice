@@ -12,9 +12,16 @@ namespace WatchTower.Controllers;
 public class CameraController(CameraService cameraService) : ControllerBase
 {
     [HttpPost("register-camera")]
-    public async Task<IActionResult> RegisterCamera([FromBody] CameraRegistrationDto dto)
+    public async Task<IActionResult> RegisterCamera(string ip, string name, string password)
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var dto = new CameraRegistrationDto()
+        {
+            Ip = ip,
+            Name = name,
+            Password = password
+        };
         
         var camera = await cameraService.RegisterCameraAsync(dto, userId);
         

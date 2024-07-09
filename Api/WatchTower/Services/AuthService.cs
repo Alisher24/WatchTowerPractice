@@ -52,4 +52,12 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
 
         return user;
     }
+
+    public async Task Logout(int userId)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        user.Token = null;
+        user.IsActive = false;
+        await dbContext.SaveChangesAsync();
+    }
 }

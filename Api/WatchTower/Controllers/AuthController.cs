@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WatchTower.Database.Models;
@@ -68,23 +68,13 @@ namespace WatchTower.Controllers
             return Ok(loggedInUser);
         }
 
-        [Authorize(Roles = "Everyone")]
-        [HttpGet]
-        public IActionResult Test()
+        [Authorize]
+        [HttpGet("Logout")]
+        public async Task<IActionResult> Logout()
         {
-            string token = Request.Headers["Authorization"];
-
-            if (token != null && token.StartsWith("Bearer"))
-            {
-                token = token.Substring("Bearer ".Length).Trim();
-            }
-            var handler = new JwtSecurityTokenHandler();
-
-            var jwt = handler.ReadJwtToken(token);
-
-            var claims = jwt.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
-
-            return Ok(claims);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await authService.Logout(userId);
+            return Ok();
         }
     }
 }
