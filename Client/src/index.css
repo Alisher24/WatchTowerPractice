@@ -42,9 +42,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #c9c9c9;
+  background-color: #b2bbff;
   cursor: pointer;
   transition: border-color 0.25s;
+}
+button:active {
+  background-color: #8d98e1;
+  transition: background-color 0.2s;
 }
 button:hover {
   border-color: #646cff;

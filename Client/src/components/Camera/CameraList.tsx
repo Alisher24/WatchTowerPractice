@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import apiService from '../../services/api/auth.service';
 import "./CameraList.css";
 
-// const fakeCameras = [
-//   { id: 1, name: 'Camera 1', ip: '192.168.1.101', password: 'password1' },
-//   { id: 2, name: 'Camera 2', ip: '192.168.1.102', password: 'password2' },
-//   { id: 3, name: 'Camera 3', ip: '192.168.1.103', password: 'password3' },
-//   { id: 4, name: 'Camera 4', ip: '192.168.1.104', password: 'password4' },
-//   { id: 5, name: 'Camera 5', ip: '192.168.1.105', password: 'password5' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-// ];
+const fakeCameras = [
+  { id: 1, name: 'Camera 1', ip: '192.168.1.101', password: 'password1' },
+  { id: 2, name: 'Camera 2', ip: '192.168.1.102', password: 'password2' },
+  { id: 3, name: 'Camera 3', ip: '192.168.1.103', password: 'password3' },
+  { id: 4, name: 'Camera 4', ip: '192.168.1.104', password: 'password4' },
+  { id: 5, name: 'Camera 5', ip: '192.168.1.105', password: 'password5' },
+  { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
+];
 
 interface Camera {
    id: number;
@@ -24,10 +24,10 @@ interface CameraListProps {
 }
 
 const CameraList: React.FC<CameraListProps> =  ({ onStartStream, onStopStream }) => {
-  // const [cameras, setCameras] = useState<any[]>(fakeCameras);
-  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [cameras, setCameras] = useState<any[]>(fakeCameras);
+  // const [cameras, setCameras] = useState<Camera[]>([]);
   const [error, setError] = useState<string>('');
-  const [activeStreams, setActiveStreams] = useState<any[]>([]);
+  // const [activeStreams, setActiveStreams] = useState<any[]>([]);
 
   useEffect(() => {
     apiService.getCameras()

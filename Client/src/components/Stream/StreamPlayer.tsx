@@ -1,6 +1,8 @@
 // src/components/StreamPlayer.tsx
 import React, { useEffect, useRef } from 'react';
-import JSMpeg from 'jsmpeg';
+// @ts-expect-error
+import {JSMpeg} from 'jsmpeg';
+// const JSMpeg   = require('../../../public/jsmpeg.min.js');
 
 interface StreamPlayerProps {
   wsUrl: string;
@@ -19,7 +21,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
     };
   }, [wsUrl]);
 
-  return <canvas ref={canvasRef} />;
+  return <>
+    <canvas ref={canvasRef}/>
+  </>;
 };
 
 export default StreamPlayer;
