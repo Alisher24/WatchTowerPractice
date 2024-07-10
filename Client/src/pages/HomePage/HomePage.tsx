@@ -11,6 +11,7 @@ interface Camera {
   name: string;
   ip: string;
   password: string;
+  wsUrl: string;
 }
 
 const HomePage: React.FC = () => {
@@ -18,7 +19,7 @@ const HomePage: React.FC = () => {
   const [activeStreams, setActiveStreams] = useState<Camera[]>([]);
 
   const handleStartStream = (camera: Camera) => {
-    setActiveStreams(prevStreams => [...prevStreams, camera]);
+    setActiveStreams(prevStreams => [...prevStreams, camera]);  // TODO: delete line
     apiService.startStream(camera.ip, camera.name, camera.password)
       .then(response => response.text())
       .then(() => {
@@ -30,9 +31,10 @@ const HomePage: React.FC = () => {
       });
   };
   const handleStopStream = (camera: Camera) => {
+    setActiveStreams([]); // TODO: delete line
     apiService.stopStream()
       .then(() => {
-        setActiveStreams([]);
+        setActiveStreams([]); // stop all streams
       })
       .catch(error => {
         console.error('Ошибка остановки потока:', error);
@@ -52,12 +54,12 @@ const HomePage: React.FC = () => {
             {activeStreams.map((camera, index) => (
               <div ket={index} className="streamContainer">
                 {/*<StreamPlayer wsUrl={`wss://localhost:7034/${camera.id}`} />*/}
-                <StreamPlayer wsUrl={`https://jsmpeg.com/bjork-all-is-full-of-love.ts?1048576-2097151`} />
+                <StreamPlayer wsUrl={`ws://localhost:8090`}/>
                 <button onClick={() => handleStopStream(camera)}>Stop Stream</button>
               </div>
             ))
             }
-            <img src="https://github.com/fluidicon.png" alt="example image"/>
+            {activeStreams.length > 0 ? <></> : <img src="https://github.com/fluidicon.png" alt="example image"/>}
           </div>
         </>
       ) : (
@@ -66,7 +68,6 @@ const HomePage: React.FC = () => {
           <Link to="/login">Login</Link>
         </div>
       )}
-      <script type="text/javascript" src="/jsmpeg.min.js"></script>
     </div>
   );
 };

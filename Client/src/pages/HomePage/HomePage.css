@@ -26,7 +26,10 @@
 .content {
     margin-left: calc(var(--sidebar-width) + 30px);
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-direction: row;
     align-items: center;
     padding: 20px;
+    gap: 10px;
 }
