@@ -9,20 +9,25 @@ import "./CameraList.css";
 //   { id: 4, name: 'Camera 4', ip: '192.168.1.104', password: 'password4' },
 //   { id: 5, name: 'Camera 5', ip: '192.168.1.105', password: 'password5' },
 //   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
-//   { id: 6, name: 'Camera 6', ip: '192.168.1.106', password: 'password6' },
 // ];
-const CameraList: React.FC = () => {
+
+interface Camera {
+   id: number;
+   name: string;
+   ip: string;
+   password: string;
+}
+
+interface CameraListProps {
+  onStartStream: (camera: Camera) => void;
+  onStopStream: (camera: Camera) => void;
+}
+
+const CameraList: React.FC<CameraListProps> =  ({ onStartStream, onStopStream }) => {
   // const [cameras, setCameras] = useState<any[]>(fakeCameras);
-  const [cameras, setCameras] = useState<any[]>([]);
+  const [cameras, setCameras] = useState<Camera[]>([]);
   const [error, setError] = useState<string>('');
+  const [activeStreams, setActiveStreams] = useState<any[]>([]);
 
   useEffect(() => {
     apiService.getCameras()
@@ -34,21 +39,35 @@ const CameraList: React.FC = () => {
       });
   }, []);
 
-  const startStream = (cameraId: number) => {
-    const camera = cameras.find(c => c.id === cameraId);
-    if (camera) {
-      apiService.startStream(camera.ip, camera.name, camera.password)
-        .then(response => {
-          console.log('Stream started:', response.data);
-        })
-        .catch(err => {
-          setError('Failed to start stream');
-        });
-    } else {
-      setError('Camera not found');
-    }
-  };
-
+  // const startStream = (cameraId: number) => {
+  //   const camera = cameras.find(c => c.id === cameraId);
+  //   if (!camera) {
+  //     setError('Camera not found');
+  //     return;
+  //   }
+  //   apiService.startStream(camera.ip, camera.name, camera.password)
+  //     .then(response => {
+  //       console.log('Stream started:', response.data);
+  //       // setActiveStreams([...activeStreams, streamUrl]);
+  //     })
+  //     .catch(err => {
+  //       setError('Failed to start stream');
+  //     });
+  // };
+  //
+  // return (
+  //   <div className="cameraList">
+  //     {error && <p style={{ color: 'red' }}>{error}</p>}
+  //     <ul>
+  //       {cameras.map(camera => (
+  //         <li key={camera.id}>
+  //           {camera.name}
+  //           <button onClick={() => startStream(camera.id)}>Start Stream</button>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   </div>
+  // );
   return (
     <div className="cameraList">
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -56,7 +75,8 @@ const CameraList: React.FC = () => {
         {cameras.map(camera => (
           <li key={camera.id}>
             {camera.name}
-            <button onClick={() => startStream(camera.id)}>Start Stream</button>
+            <button onClick={() => onStartStream(camera)}>Start Stream</button>
+            <button onClick={() => onStopStream(camera)}>Stop Stream</button>
           </li>
         ))}
       </ul>

@@ -53,6 +53,10 @@ const startStream = (ip: string, name: string, password: string) => {
   });
 };
 
+const stopStream = () => {
+  return axios.get(`${API_URL}stream/stop-stream`)
+}
+
 
 export default {
   register,
@@ -60,4 +64,5 @@ export default {
   getCameras,
   registerCamera,
   startStream,
+  stopStream,
 };
