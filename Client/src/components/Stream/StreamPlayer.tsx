@@ -43,7 +43,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
       };
     };
 
-
   return <>
     <video ref={videoRef} className="streamPlayer" controls/>
     <p ref={messageRef}></p>

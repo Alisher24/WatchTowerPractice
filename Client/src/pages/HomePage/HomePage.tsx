@@ -15,7 +15,7 @@ interface Camera {
 }
 
 const HomePage: React.FC = () => {
-  const isAuthenticated = Boolean(localStorage.getItem('token')) || true;
+  const isAuthenticated = Boolean(localStorage.getItem('token'));
   const [activeStreams, setActiveStreams] = useState<Camera[]>([]);
 
   const handleStartStream = (camera: Camera) => {
@@ -23,7 +23,7 @@ const HomePage: React.FC = () => {
     apiService.startStream(camera.ip, camera.name, camera.password)
       .then(response => response.text())
       .then(() => {
-        const wsUrl = 'wss://localhost:7034/stream';
+        const wsUrl = 'ws://localhost:5003/stream';
         setActiveStreams(prevStreams => [...prevStreams, camera]);
       })
       .catch(error => {
@@ -54,7 +54,7 @@ const HomePage: React.FC = () => {
             {activeStreams.map((camera, index) => (
               <div ket={index} className="streamContainer">
                 {/*<StreamPlayer wsUrl={`wss://localhost:7034/${camera.id}`} />*/}
-                <StreamPlayer wsUrl={`ws://localhost:8090`}/>
+                <StreamPlayer wsUrl={`ws://localhost:5003/stream`}/>
                 <button onClick={() => handleStopStream(camera)}>Stop Stream</button>
               </div>
             ))
