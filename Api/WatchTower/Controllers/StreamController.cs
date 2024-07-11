@@ -28,17 +28,4 @@ public class StreamController (StreamService streamService)
         
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
     }
-    
-    /*public async Task StreamVideo()
-    {
-        if (HttpContext.WebSockets.IsWebSocketRequest)
-        {
-            using var websocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            await streamService.StreamVideo(websocket);
-        }
-        else
-        {
-            HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-        }
-    }*/
 }

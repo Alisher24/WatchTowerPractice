@@ -71,15 +71,21 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         };
     }
     
-    public static async Task StreamVideo(WebSocket webSocket)
+    public static async Task StreamVideo(HttpContext context, WebSocket webSocket)
     {
         var buffer = new byte[4096];
+        int bytesRead;
 
         try
         {
-            await using var output = GetStream();
+            using var output = StreamService.GetStream();
 
-            int bytesRead;
+            if (output == null)
+            {
+                context.Response.StatusCode = 500;
+                return;
+            }
+
             while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 if (webSocket.State != WebSocketState.Open)
@@ -94,7 +100,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         }
     }
     
-    public static Stream GetStream()
+    private static Stream GetStream()
     {
         return _ffmpegProcess?.StandardOutput.BaseStream!;
     }

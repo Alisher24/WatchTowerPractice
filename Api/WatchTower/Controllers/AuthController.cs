@@ -67,14 +67,5 @@ namespace WatchTower.Controllers
 
             return Ok(loggedInUser);
         }
-
-        [Authorize]
-        [HttpGet("Logout")]
-        public async Task<IActionResult> Logout()
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            await authService.Logout(userId);
-            return Ok();
-        }
     }
 }

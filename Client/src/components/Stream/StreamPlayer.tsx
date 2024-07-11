@@ -26,7 +26,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
       };
     };
 
-
   return <>
     <canvas ref={canvasRef} className="streamPlayer" controls/>
     <p ref={messageRef}></p>

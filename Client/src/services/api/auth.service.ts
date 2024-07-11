@@ -47,9 +47,8 @@ const registerCamera = (ip: string, name: string, password: string) => {
 };
 
 const startStream = (ip: string, name: string, password: string) => {
-  return axios.get(`${API_URL}stream/start-stream`, {
-    headers: { Authorization: `Bearer ${token}` },
-    params: { ip, name, password }
+  return axios.post(`${API_URL}stream/start-stream`, { ip, name, password }, {
+    headers: { Authorization: `Bearer ${token}` }
   });
 };
 
