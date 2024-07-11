@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import jsmpeg from "jsmpeg"
+import JSMpeg from 'jsmpeg-player';
 interface StreamPlayerProps {
   wsUrl: string;
 }
@@ -10,12 +10,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
   const messageRef = useRef<HTMLParagraphElement | null>(null)
     const startStream = async () => {
       const ws = new WebSocket(wsUrl);
-      new jsmpeg(ws, {canvas: canvasRef.current})
+      new JSMpeg.Player(wsUrl, {canvas: canvasRef.current, autoplay: true})
       ws.binaryType = 'arraybuffer';
-      ws.onmessage = async (event) => {
+  /*    ws.onmessage = async (event) => {
         const videoData = new Uint8Array(event.data);
-        console.log("web buffer:", videoData);
-      };
+        //console.log("web buffer:", videoData);
+      };*/
 
       ws.onclose = () => {
         console.log('WebSocket connection closed');

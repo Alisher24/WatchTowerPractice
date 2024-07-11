@@ -12,12 +12,10 @@
   "dependencies": {
     "@emotion/core": "^11.0.0",
     "@emotion/styled": "^11.11.5",
-    "@ffmpeg/ffmpeg": "=0.12.3",
-    "@ffmpeg/util": "^0.12.1",
     "axios": "^0.20.0",
     "bootstrap": "^5.3.3",
-    "ffmpeg": "^0.0.4",
     "jsmpeg": "^1.0.0",
+    "jsmpeg-player": "^3.0.3",
     "node-rtsp-stream-jsmpeg": "^0.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
