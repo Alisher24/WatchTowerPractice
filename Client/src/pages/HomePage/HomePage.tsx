@@ -15,7 +15,7 @@ interface Camera {
 }
 
 const HomePage: React.FC = () => {
-  const isAuthenticated = Boolean(localStorage.getItem('token')) || true;
+  const isAuthenticated = Boolean(localStorage.getItem('token')) || true; // TODO: delete "|| true"
   const [activeStreams, setActiveStreams] = useState<Camera[]>([]);
 
   const handleStartStream = (camera: Camera) => {
