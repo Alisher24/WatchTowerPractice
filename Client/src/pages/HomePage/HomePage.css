@@ -11,6 +11,12 @@
 /*    border-right: 1px solid #ddd;*/
 /*}*/
 
+.topRight {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    
+}
 
 .sidebar {
     
