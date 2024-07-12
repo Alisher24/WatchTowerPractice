@@ -12,10 +12,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
       const ws = new WebSocket(wsUrl);
       new JSMpeg.Player(wsUrl, {canvas: canvasRef.current, autoplay: true})
       ws.binaryType = 'arraybuffer';
-  /*    ws.onmessage = async (event) => {
+      ws.onmessage = async (event) => {
         const videoData = new Uint8Array(event.data);
-        //console.log("web buffer:", videoData);
-      };*/
+        console.log("web buffer:", videoData);
+      };
 
       ws.onclose = () => {
         console.log('WebSocket connection closed');

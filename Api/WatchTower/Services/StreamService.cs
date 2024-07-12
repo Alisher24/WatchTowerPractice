@@ -7,6 +7,7 @@ namespace WatchTower.Services;
 public class StreamService(ILogger<StreamService> logger, IConfiguration configuration)
 {
     private static Process? _ffmpegProcess;
+    private static HashSet<string> _webSockets = new HashSet<string>();
 
     public BaseResult<string> StartSream(string streamUrl)
     {
@@ -41,7 +42,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
 
             return new BaseResult<string>()
             {
-                Data = "Stream started"
+                Data = GenerationWebSocket()
             };
         }
         catch (Exception ex)
@@ -51,6 +52,20 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
                 ErrorMessage = ex.Message
             };
         }
+    }
+
+    private string GenerationWebSocket()
+    {
+        string uniquePath = Guid.NewGuid().ToString();
+        while (_webSockets.Contains(uniquePath))
+        {
+            uniquePath = Guid.NewGuid().ToString();
+        }
+
+        _webSockets.Add(uniquePath);
+        Console.WriteLine(uniquePath);
+
+        return uniquePath;
     }
 
     public BaseResult<string> StopStream()
@@ -64,6 +79,7 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
                 Data = "Stream stopped"
             };
         }
+        
 
         return new BaseResult<string>()
         {
@@ -71,28 +87,25 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         };
     }
     
-    public static async Task StreamVideo(HttpContext context, WebSocket webSocket)
+    public static async Task StreamVideo(WebSocket webSocket)
     {
         var buffer = new byte[4096];
-        int bytesRead;
 
         try
         {
-            using var output = StreamService.GetStream();
+            await using var output = GetStream();
+            Console.WriteLine("teper tut");
 
-            if (output == null)
-            {
-                context.Response.StatusCode = 500;
-                return;
-            }
-
+            int bytesRead;
             while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 if (webSocket.State != WebSocketState.Open)
                     break;
-
+                
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary, true, CancellationToken.None);
             }
+            Console.WriteLine("CloseWebsocket");
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", CancellationToken.None);
         }
         finally
         {

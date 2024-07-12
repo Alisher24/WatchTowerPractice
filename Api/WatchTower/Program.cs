@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -95,16 +96,19 @@ app.MapControllers();
 
 app.UseWebSockets();
 
-app.Map("/stream", async context =>
+app.Use(async (context, next) =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        await StreamService.StreamVideo(context, webSocket);
+        Console.WriteLine(context.Request.Path);
+        Console.WriteLine(webSocket.State);
+        await StreamService.StreamVideo(webSocket);
     }
     else
     {
-        context.Response.StatusCode = 400;
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await next(context);
     }
 });
 
