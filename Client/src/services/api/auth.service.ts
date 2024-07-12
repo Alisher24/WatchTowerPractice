@@ -46,7 +46,7 @@ const registerCamera = (ip: string, name: string, password: string) => {
   })
 };
 
-const startStream = (ip: string, name: string, password: string) => {
+const startStream = (ip: string, name: string, password: string) => 
   axios.post(`${API_URL}stream/start-stream`, { ip, name, password }, {
     headers: { Authorization: `Bearer ${token}` }
   }).then((response) => {
@@ -57,7 +57,6 @@ const startStream = (ip: string, name: string, password: string) => {
     console.error("Start stream error: ", error);
     throw error;
   });
-};
 
 const stopStream = () => {
   return axios.get(`${API_URL}stream/stop-stream`)

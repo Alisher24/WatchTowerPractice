@@ -75,8 +75,8 @@ const CameraList: React.FC<CameraListProps> =  ({ onStartStream, onStopStream })
         {cameras.map(camera => (
           <li key={camera.id}>
             {camera.name}
-            <button onClick={() => onStartStream(camera)}>Start Stream</button>
-            <button onClick={() => onStopStream(camera)}>Stop Stream</button>
+            <button onClick={() => onStartStream(camera)}>Start</button>
+            <button onClick={() => onStopStream(camera)}>Stop</button>
           </li>
         ))}
       </ul>

@@ -5,6 +5,7 @@
 }
 
 .cameraList li {
+    display: flex;
     margin-bottom: 10px;
 }
 

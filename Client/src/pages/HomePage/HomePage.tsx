@@ -15,14 +15,14 @@ interface Camera {
 }
 
 const HomePage: React.FC = () => {
-  let isAuthenticated = Boolean(localStorage.getItem('token'));
+  let isAuthenticated = Boolean(localStorage.getItem('token')) || true;
   const [activeStreams, setActiveStreams] = useState<Camera[]>([]);
 
   const handleStartStream = (camera: Camera) => {
-    setActiveStreams(prevStreams => [...prevStreams, camera]);  // TODO: delete line
     apiService.startStream(camera.ip, camera.name, camera.password)
-      .then(response => response.text())
+      // .then(response => response.text())
       .then((url) => {
+        console.log("WSURL", url);
         const wsUrl = `ws://localhost:5003/${url}`;
         camera.wsUrl = wsUrl;
         setActiveStreams(prevStreams => [...prevStreams, camera]);
@@ -46,20 +46,20 @@ const HomePage: React.FC = () => {
   const exitUser = () => {
     localStorage.removeItem('token');
     isAuthenticated = false;
-    // window.location.reload();
+    window.location.reload();
   };
   return (
     <div className="homePage">
       {isAuthenticated ? (
         <>
-          <div classname="topRight"><button onclick={exitUser}>Exit</button></div>
+          <div className="topRight"><button onClick={exitUser}>Exit</button></div>
           <div className="sidebar">
             <CameraRegister/>
             <CameraList onStartStream={handleStartStream} onStopStream={handleStopStream}/>
           </div>
           <div className="content">
             {activeStreams.map((camera, index) => (
-              <div ket={index} className="streamContainer">
+              <div key={index} className="streamContainer">
                 {/*<StreamPlayer wsUrl={`wss://localhost:7034/${camera.id}`} />*/}
                 <StreamPlayer wsUrl={camera.wsUrl}/>
                 <button onClick={() => handleStopStream(camera)}>Stop Stream</button>
