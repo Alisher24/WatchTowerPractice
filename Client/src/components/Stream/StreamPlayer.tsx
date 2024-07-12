@@ -8,7 +8,7 @@ interface StreamPlayerProps {
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const startStream =  () => {
-      new JSMpeg.Player(wsUrl, {canvas: canvasRef.current, autoplay: true})
+      new JSMpeg.Player(wsUrl, {canvas: canvasRef.current})
     };
     startStream();
   return <>

@@ -1,31 +1,29 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Xml.Linq;
 using WatchTower.Common.Result;
 
 namespace WatchTower.Services;
 
-public class StreamService(ILogger<StreamService> logger, IConfiguration configuration)
+public class StreamService(
+    IConfiguration configuration,
+    ILogger<StreamService> logger)
 {
-    private static Process? _ffmpegProcess;
-    private static HashSet<string> _webSockets = new HashSet<string>();
+    private static ConcurrentDictionary<string, Process> _ffmpegProcesses = new();
 
-    public BaseResult<string> StartSream(string streamUrl)
+    private Process StartFfmpeg(string streamUrl)
     {
         logger.LogInformation("Received request to start stream with URL: {StreamUrl}", streamUrl);
-
-        if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
-        {
-            logger.LogInformation("Stopping existing FFmpeg process.");
-            _ffmpegProcess.Kill();
-        }
 
         try
         {
             var ffmpegPath = configuration["FFMPEG:Path"];
+
             var arguments = $"-i {streamUrl} -f mpegts -codec:v mpeg1video pipe:1";
             logger.LogInformation("Starting FFmpeg process with arguments: {Arguments}", arguments);
 
-            _ffmpegProcess = new Process
+            var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -37,12 +35,32 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
                 }
             };
 
-            _ffmpegProcess.Start();
+            process.Start();
             logger.LogInformation("FFmpeg process started.");
+            return process;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            logger.LogError(ex, "");
+            throw;
+        }
+    }
+
+    public BaseResult<string> FfmpegStarter(string url, string ip)
+    {
+        try
+        {
+            if (!_ffmpegProcesses.ContainsKey(ip))
+            {
+                var ffmpegProces = StartFfmpeg(url);
+                var status = _ffmpegProcesses.TryAdd(ip, ffmpegProces);
+                logger.LogInformation("Add status ffmpeg process {status}", status);
+            }
 
             return new BaseResult<string>()
             {
-                Data = GenerationWebSocket()
+                Data = url
             };
         }
         catch (Exception ex)
@@ -54,67 +72,61 @@ public class StreamService(ILogger<StreamService> logger, IConfiguration configu
         }
     }
 
-    private string GenerationWebSocket()
+    public BaseResult<string> StopStream(string ip)
     {
-        string uniquePath = Guid.NewGuid().ToString();
-        while (_webSockets.Contains(uniquePath))
+        if (_ffmpegProcesses.ContainsKey(ip))
         {
-            uniquePath = Guid.NewGuid().ToString();
-        }
-
-        _webSockets.Add(uniquePath);
-        Console.WriteLine(uniquePath);
-
-        return uniquePath;
-    }
-
-    public BaseResult<string> StopStream()
-    {
-        if (_ffmpegProcess != null && !_ffmpegProcess.HasExited)
-        {
-            _ffmpegProcess.Kill();
+            _ffmpegProcesses[ip].Kill();
             logger.LogInformation("FFmpeg process stopped.");
+            _ffmpegProcesses.TryRemove(ip, out _);
             return new BaseResult<string>()
             {
                 Data = "Stream stopped"
             };
         }
-        
 
         return new BaseResult<string>()
         {
             ErrorMessage = "No stream to stop"
         };
     }
-    
-    public static async Task StreamVideo(WebSocket webSocket)
+
+    public async Task StreamVideo(WebSocket webSocket, CancellationToken cancellationToken, string ip)
     {
-        var buffer = new byte[4096];
+        var buffer = new byte[30720];
 
         try
         {
-            await using var output = GetStream();
-            Console.WriteLine("teper tut");
+
+            var output = _ffmpegProcesses[ip].StandardOutput.BaseStream;
+            logger.LogInformation("Ffmpeg process status = {status}", output.CanRead);
 
             int bytesRead;
-            while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length)) > 0)
+
+            logger.LogInformation("bytesRead = {b}",
+                await output.ReadAsync(buffer, 0, buffer.Length, cancellationToken) > 0);
+
+            while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
             {
-                if (webSocket.State != WebSocketState.Open)
+                if (webSocket.State == WebSocketState.Closed || cancellationToken.IsCancellationRequested)
+                {
+                    logger.LogInformation("webSocket.State = {state} and cancellation token = {token}", webSocket.State,
+                        cancellationToken.IsCancellationRequested);
                     break;
-                
-                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary, true, CancellationToken.None);
+                }
+
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary,
+                    true, cancellationToken);
             }
-            Console.WriteLine("CloseWebsocket");
-            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "");
         }
         finally
         {
-            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", CancellationToken.None);
+            logger.LogInformation("Stop stream");
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", cancellationToken);
         }
-    }
-    
-    private static Stream GetStream()
-    {
-        return _ffmpegProcess?.StandardOutput.BaseStream!;
     }
 }

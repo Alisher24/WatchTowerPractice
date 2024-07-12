@@ -1,4 +1,3 @@
-using System.Net.WebSockets;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +12,9 @@ builder.Services.AddDbContext<WatchTowerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<StreamService>();
+
 builder.Services.AddScoped<CameraService>();
+builder.Services.AddSingleton<StreamService>();
 
 builder.Services.AddCors(options =>
 {
@@ -96,19 +96,17 @@ app.MapControllers();
 
 app.UseWebSockets();
 
-app.Use(async (context, next) =>
+app.Map("/stream/{ip}", async (HttpContext context, StreamService service, CancellationToken ct, string ip) =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        Console.WriteLine(context.Request.Path);
-        Console.WriteLine(webSocket.State);
-        await StreamService.StreamVideo(webSocket);
+        Console.WriteLine(ip);
+        await service.StreamVideo(webSocket, ct, ip);
     }
     else
     {
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        await next(context);
+        context.Response.StatusCode = 400;
     }
 });
 

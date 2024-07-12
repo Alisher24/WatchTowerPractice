@@ -16,15 +16,15 @@ public class StreamController (StreamService streamService)
     {
         var streamUrl = $"rtsp://{cameraDto.Name}:{cameraDto.Password}@{cameraDto.Ip}";
 
-        var result = streamService.StartSream(streamUrl);
+        var result = streamService.FfmpegStarter(streamUrl, cameraDto.Ip);
 
-        return Task.FromResult<IActionResult>(result.IsSuccess ? Ok(cameraDto.Ip + "/" + result.Data) : BadRequest(result.ErrorMessage));
+        return Task.FromResult<IActionResult>(result.IsSuccess ? Ok(cameraDto.Ip) : BadRequest(result.ErrorMessage));
     }
 
     [HttpGet("stop-stream")]
-    public IActionResult StopStream()
+    public IActionResult StopStream(string ip)
     {
-        var result = streamService.StopStream();
+        var result = streamService.StopStream(ip);
         
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
     }

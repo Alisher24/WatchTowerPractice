@@ -23,7 +23,7 @@ const HomePage: React.FC = () => {
       // .then(response => response.text())
       .then((url) => {
         console.log("WSURL", url);
-        const wsUrl = `ws://localhost:5003/${url}`;
+        const wsUrl = `ws://localhost:5003/stream/${url}`;
         camera.wsUrl = wsUrl;
         setActiveStreams(prevStreams => [...prevStreams, camera]);
       })
