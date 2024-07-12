@@ -15,7 +15,7 @@ interface Camera {
 }
 
 const HomePage: React.FC = () => {
-  let isAuthenticated = Boolean(localStorage.getItem('token')) || true;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(localStorage.getItem('token')));
   const [activeStreams, setActiveStreams] = useState<Camera[]>([]);
 
   const handleStartStream = (camera: Camera) => {
@@ -45,8 +45,8 @@ const HomePage: React.FC = () => {
 
   const exitUser = () => {
     localStorage.removeItem('token');
-    isAuthenticated = false;
-    window.location.reload();
+    setIsAuthenticated(false);
+    // window.location.reload();
   };
   return (
     <div className="homePage">
