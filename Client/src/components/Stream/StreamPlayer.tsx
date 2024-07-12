@@ -7,29 +7,13 @@ interface StreamPlayerProps {
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const messageRef = useRef<HTMLParagraphElement | null>(null)
-    const startStream = async () => {
-      const ws = new WebSocket(wsUrl);
+    const startStream =  () => {
       new JSMpeg.Player(wsUrl, {canvas: canvasRef.current, autoplay: true})
-      ws.binaryType = 'arraybuffer';
-      ws.onmessage = async (event) => {
-        const videoData = new Uint8Array(event.data);
-        console.log("web buffer:", videoData);
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket connection closed');
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
     };
-
+    startStream();
   return <>
     <canvas ref={canvasRef} className="streamPlayer" controls/>
-    <p ref={messageRef}></p>
-    <button onClick={startStream}>Load ffmpeg-core</button>
+    {/*<button onClick={startStream}>Load ffmpeg-core</button>*/}
   </>;
 };
 

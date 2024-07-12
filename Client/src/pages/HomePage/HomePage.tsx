@@ -22,8 +22,9 @@ const HomePage: React.FC = () => {
     setActiveStreams(prevStreams => [...prevStreams, camera]);  // TODO: delete line
     apiService.startStream(camera.ip, camera.name, camera.password)
       .then(response => response.text())
-      .then(() => {
-        const wsUrl = 'ws://localhost:5003/stream';
+      .then((url) => {
+        const wsUrl = `ws://localhost:5003/${url}`;
+        camera.wsUrl = wsUrl;
         setActiveStreams(prevStreams => [...prevStreams, camera]);
       })
       .catch(error => {
@@ -54,7 +55,7 @@ const HomePage: React.FC = () => {
             {activeStreams.map((camera, index) => (
               <div ket={index} className="streamContainer">
                 {/*<StreamPlayer wsUrl={`wss://localhost:7034/${camera.id}`} />*/}
-                <StreamPlayer wsUrl={`ws://localhost:5003/stream`}/>
+                <StreamPlayer wsUrl={camera.wsUrl}/>
                 <button onClick={() => handleStopStream(camera)}>Stop Stream</button>
               </div>
             ))

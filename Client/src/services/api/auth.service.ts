@@ -43,12 +43,19 @@ const registerCamera = (ip: string, name: string, password: string) => {
   console.log(`Bearer ${token}`)
   return axios.post(`${API_URL}camera/register-camera`, { ip, name, password }, {
     headers: { Authorization: `Bearer ${token}`}
-  });
+  })
 };
 
 const startStream = (ip: string, name: string, password: string) => {
-  return axios.post(`${API_URL}stream/start-stream`, { ip, name, password }, {
+  axios.post(`${API_URL}stream/start-stream`, { ip, name, password }, {
     headers: { Authorization: `Bearer ${token}` }
+  }).then((response) => {
+    console.log(response);
+    console.log(response.data.data);
+    return response.data;
+  }).catch((error) => {
+    console.error("Start stream error: ", error);
+    throw error;
   });
 };
 
