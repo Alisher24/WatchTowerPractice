@@ -7,14 +7,25 @@ interface StreamPlayerProps {
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const startStream =  () => {
-      new JSMpeg.Player(wsUrl, {canvas: canvasRef.current})
-    };
-    startStream();
-  return <>
-    <canvas ref={canvasRef} className="streamPlayer" controls/>
-    {/*<button onClick={startStream}>Load ffmpeg-core</button>*/}
-  </>;
-};
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "/js/jsmpeg.min.js";
+    script.onload = () => {
+      // @ts-ignore
+      const player = new window.JSMpeg.Player(wsUrl, { canvas: canvasRef.current});
+
+      return () => {
+        player.destroy();
+      };
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [wsUrl]);
+
+  return <canvas ref={canvasRef} className="streamPlayer" />;
+};
 export default StreamPlayer;
