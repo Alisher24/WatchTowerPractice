@@ -4,14 +4,16 @@ namespace WatchTower.DTO;
 
 public class CameraDto
 {
-    public string? Ip {  get; set; }
-    public string? Name { get; set; }
-    public string? Password { get; set; }
+    public required int Id { get; set; }
+    public required string Ip {  get; init; }
+    public string? Name { get; init; }
+    public string? Password { get; init; }
         
     public static CameraDto FromModel (Camera camera)
     {
         return new CameraDto()
         {
+            Id = camera.Id,
             Ip = camera.Ip,
             Name = camera.Name,
             Password = camera.Password

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WatchTower.DTO;
 using WatchTower.Services;
@@ -16,9 +17,22 @@ public class StreamController (StreamService streamService)
     {
         var streamUrl = $"rtsp://{cameraDto.Name}:{cameraDto.Password}@{cameraDto.Ip}";
 
-        var result = streamService.FfmpegStarter(streamUrl, cameraDto.Ip);
+        var result = streamService.FfmpegStarter(streamUrl, cameraDto.Ip!);
 
         return Task.FromResult<IActionResult>(result.IsSuccess ? Ok(cameraDto.Ip) : BadRequest(result.ErrorMessage));
     }
-    
+
+    [HttpGet("{id}")]
+    public async Task WebSocketConnection(string id)
+    {
+        var context = HttpContext;
+        if (context.WebSockets.IsWebSocketRequest)
+        {
+            var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            Console.WriteLine(id);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var ip = await streamService.GetIpCameraAsync(int.Parse(id), userId);
+            await streamService.StreamVideo(webSocket, context.RequestAborted, ip);
+        }
+    }
 }

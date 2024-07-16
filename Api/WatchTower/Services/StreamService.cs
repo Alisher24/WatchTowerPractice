@@ -1,14 +1,17 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
+using Microsoft.EntityFrameworkCore;
 using WatchTower.Common;
 using WatchTower.Common.Result;
+using WatchTower.Database;
 
 namespace WatchTower.Services;
 
 public class StreamService(
     IConfiguration configuration,
-    ILogger<StreamService> logger)
+    ILogger<StreamService> logger,
+    WatchTowerDbContext dbContext)
 {
     
     private static readonly ConcurrentDictionary
@@ -111,7 +114,6 @@ public class StreamService(
         {
             FfmpegProcesses[ip].Status = false;
         }
-
     }
 
     public async Task StreamVideo(
@@ -173,5 +175,13 @@ public class StreamService(
                 }
             }
         }
+    }
+
+    public async Task<string> GetIpCameraAsync(int id, int userId)
+    {
+        var ipCamera = await dbContext.Cameras
+            .Where(c => c.UserId == userId)
+            .FirstOrDefaultAsync(c => c.Id == id);
+        return ipCamera!.Ip;
     }
 }

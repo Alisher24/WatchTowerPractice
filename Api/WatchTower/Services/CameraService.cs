@@ -16,6 +16,7 @@ public class CameraService(WatchTowerDbContext dbContext)
                 .Where(x => x.UserId == userId)
                 .Select(s => new CameraDto()
                 {
+                    Id = s.Id,
                     Ip = s.Ip,
                     Name = s.Name,
                     Password = s.Password
@@ -46,6 +47,7 @@ public class CameraService(WatchTowerDbContext dbContext)
 
             var cameraDto = new CameraDto()
             {
+                Id = camera.Id,
                 Ip = camera.Ip,
                 Name = camera.Name,
                 Password = camera.Password
@@ -55,7 +57,7 @@ public class CameraService(WatchTowerDbContext dbContext)
             {
                 return new BaseResult<CameraDto>
                 {
-                    ErrorMessage = $"Камеры с данным ip: {ip} не существует"
+                    ErrorMessage = $"Camera with ip: {ip} not found"
                 };
             }
 

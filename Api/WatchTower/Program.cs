@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -14,7 +15,7 @@ builder.Services.AddDbContext<WatchTowerDbContext>(options =>
 builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddScoped<CameraService>();
-builder.Services.AddSingleton<StreamService>();
+builder.Services.AddScoped<StreamService>();
 
 builder.Services.AddCors(options =>
 {
@@ -92,11 +93,11 @@ app.UseCors("MyConfiguration");
 
 app.UseAuthorization();
 
-app.MapControllers();
-
 app.UseWebSockets();
 
-app.Map("/stream/{ip}", async (HttpContext context, StreamService service, CancellationToken ct, string ip) =>
+app.MapControllers();
+
+/*app.Map("/stream/{ip}", async (HttpContext context, StreamService service, CancellationToken ct, string ip) =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
@@ -108,6 +109,6 @@ app.Map("/stream/{ip}", async (HttpContext context, StreamService service, Cance
     {
         context.Response.StatusCode = 400;
     }
-});
+});*/
 
 app.Run();
