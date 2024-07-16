@@ -1,6 +1,6 @@
 .homePage {
     display: flex;
-    --sidebar-width: 320px;
+    --sidebar-width: 160px;
     width: 100vw;
 }
 
@@ -13,9 +13,10 @@
 
 .topRight {
     position: fixed;
-    top: 10px;
-    right: 10px;
-    
+    top: 5px;
+    right: 5px;
+    z-index: 9;
+    font-size: smaller;
 }
 
 .sidebar {
@@ -28,14 +29,110 @@
     top: 0;
     bottom: 0;
     padding: 20px;
+    z-index: 10;
 }
 .content {
     margin-left: calc(var(--sidebar-width) + 30px);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
+    /*display: flex;*/
+    /*flex-wrap: wrap;*/
+    /*justify-content: center;*/
+    /*flex-direction: row;*/
+    /*align-items: center;*/
     padding: 20px;
+    /*gap: 10px;*/
+}
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 20px);
+}
+.streamContainer {
+    position: relative;
+    background-color: #000;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+    z-index: 5;
+}
+
+.cross {
+    --size: 20px;
+    --color: white;
+    --thickness: 3px;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+}
+
+.cross:before,
+.cross:after {
+    content: '';
+    position: absolute;
+    top: calc((var(--size) - var(--thickness)) / 2);
+    left: 0;
+    right: 0;
+    height: var(--thickness);
+    background: var(--color);
+    border-radius: var(--thickness);
+}
+
+.cross:before {
+    transform: rotate(45deg);
+}
+
+.cross:after {
+    transform: rotate(-45deg);
+}
+
+.cross span {
+    display: block;
+}
+
+
+.btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: hsl(216 100 50);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 150ms;
+
+}
+
+.btn-close:hover,
+.btn-close:focus {
+    transform: rotateZ(90deg);
+    background: hsl(216 100 40);
+}
+.visually-hidden {
+       position: absolute !important;
+       clip: rect(1px, 1px, 1px, 1px);
+       padding: 0 !important;
+       border: 0 !important;
+       height: 1px !important;
+       width: 1px !important;
+       overflow: hidden;
+   }
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 10px;
+    justify-content: center;
 }

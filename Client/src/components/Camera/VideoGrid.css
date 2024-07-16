@@ -1,0 +1,118 @@
+/* Container for video grid and settings button */
+.video-grid-container {
+    position: relative;
+}
+
+/* Settings button styling */
+#settingsButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 9;
+    background: hsl(216  100  50);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+/* Popup styling */
+.settings-popup {
+    display: block;
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9;
+    margin: 5px 0;
+}
+
+.settings-popup label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.settings-popup input {
+    width: 100%;
+}
+
+/* Grid container for the videos */
+.video-grid {
+    display: grid;
+    gap: 10px; /* Adjust gap between items */
+    justify-content: center;
+}
+
+/* Container for each video and close button */
+.streamContainer {
+    position: relative;
+    width: 100%; /* Full width of the grid column */
+    padding-top: 56.25%; /* 16:9 aspect ratio (100% / (16/9)) */
+    background-color: #000; /* Optional: background color for video container */
+}
+
+/* Canvas styling */
+.streamContainer canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 20px);
+}
+
+/* Button Styles */
+.btn-close {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: hsl(216, 100, 50);
+    border-radius: 50%;
+    width: 40px;  /* Adjust size as needed */
+    height: 40px; /* Adjust size as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;   /* Adjust positioning as needed */
+    right: 10px; /* Adjust positioning as needed */
+    transition: all 150ms;
+}
+
+.btn-close .cross {
+    --size: 20px;   /* Adjust size as needed */
+    --color: #fff;  /* Adjust color as needed */
+    --thickness: 3px; /* Adjust thickness as needed */
+    width: var(--size);
+    height: var(--size);
+}
+
+.btn-close .cross:before,
+.btn-close .cross:after {
+    content: '';
+    position: absolute;
+    top: calc((var(--size) - var(--thickness)) / 2);
+    left: 0;
+    right: 0;
+    height: var(--thickness);
+    background: var(--color);
+    border-radius: var(--thickness);
+}
+
+.btn-close .cross:before {
+    transform: rotate(45deg);
+}
+
+.btn-close .cross:after {
+    transform: rotate(-45deg);
+}
+
+.btn-close:hover,
+.btn-close:focus {
+    transform: rotateZ(90deg);
+    background: hsl(216, 100, 40);
+}

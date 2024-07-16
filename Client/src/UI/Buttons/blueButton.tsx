@@ -8,7 +8,7 @@ const BlueButton = (props) => {
       <button
         type="button"
         style={{
-          background: '#1037AA',
+          background: '#1241cc',
           padding: '10px 16px',
           marginRight: '10px',
           border: '1px solid #E5E5E5',

@@ -30,4 +30,5 @@ export const PasswordButton = styled('button')`
     cursor: pointer;
     padding: 5px;
     margin-bottom: 10px;
+    color: black;
 `;

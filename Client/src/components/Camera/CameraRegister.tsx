@@ -3,6 +3,7 @@ import apiService from '../../services/api/auth.service';
 import './CameraRegister.css';
 
 const CameraRegister: React.FC = () => {
+  const [title, setTitle] = useState<string>('');
   const [ip, setIp] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -10,7 +11,7 @@ const CameraRegister: React.FC = () => {
   const [success, setSuccess] = useState<string>('');
 
   const handleRegister = () => {
-    apiService.registerCamera(ip, name, password)
+    apiService.registerCamera(title, ip, name, password)
       .then(response => {
         setSuccess('Camera registered successfully');
         setError('');
@@ -25,6 +26,12 @@ const CameraRegister: React.FC = () => {
     <div className="cameraRegister">
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
       <input
         type="text"
         placeholder="Camera IP"

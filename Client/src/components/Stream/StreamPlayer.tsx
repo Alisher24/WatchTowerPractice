@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react';
-/*import JSMpeg from 'jsmpeg-player';*/
 interface StreamPlayerProps {
   wsUrl: string;
 }

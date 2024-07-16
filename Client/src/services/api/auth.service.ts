@@ -39,7 +39,7 @@ const getCameras = () => {
   });
 };
 
-const registerCamera = (ip: string, name: string, password: string) => {
+const registerCamera = (title: string, ip: string, name: string, password: string) => {
   console.log(`Bearer ${token}`)
   return axios.post(`${API_URL}camera/register-camera`, { ip, name, password }, {
     headers: { Authorization: `Bearer ${token}`}
@@ -61,7 +61,28 @@ const startStream = (ip: string, name: string, password: string) =>
 const stopStream = () => {
   return axios.get(`${API_URL}stream/stop-stream`)
 }
-
+const updateCamera = (id: number, updatedCamera: { title: string;  id: number;  name: string;  ip: string;  password: string;}) => 
+  axios.post(`${API_URL}camera/update-camera`, { id, updatedCamera }, {
+  headers: { Authorization: `Bearer ${token}` }
+}).then((response) => {
+  console.log(response);
+  console.log(response.data.data);
+  return response.data;
+}).catch((error) => {
+  console.error("error: ", error);
+  throw error;
+});
+const DeleteCamera = (id: number) => 
+  axios.post(`${API_URL}camera/delete-camera`, { id }, {
+  headers: { Authorization: `Bearer ${token}` }
+}).then((response) => {
+  console.log(response);
+  console.log(response.data.data);
+  return response.data;
+}).catch((error) => {
+  console.error("error: ", error);
+  throw error;
+});
 
 export default {
   register,
@@ -70,4 +91,6 @@ export default {
   registerCamera,
   startStream,
   stopStream,
+  updateCamera,
+  deleteCamera: DeleteCamera
 };

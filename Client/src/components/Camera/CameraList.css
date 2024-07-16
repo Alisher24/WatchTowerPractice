@@ -4,12 +4,23 @@
     padding: 0;
 }
 
-.cameraList li {
+.cameraList > ul > li {
+    z-index: 100;
     display: flex;
-    margin-bottom: 10px;
+    flex-direction: column;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+.cameraList > ul > li > h4 {
+    margin: 0;
+    padding-left: 10px;
+}
+.cameraList > ul > li > div {
+    display: flex;
 }
 
-.cameraList input {
+.cameraList > ul > input {
     margin-right: 5px;
     width: calc(100% - 70px);
 }

@@ -14,6 +14,7 @@ const WhiteButton = (props) => {
           border: '1px solid #E5E5E5',
           borderRadius: '8px',
           cursor: 'pointer',
+          color: "black"
         }}
       >
         { title }

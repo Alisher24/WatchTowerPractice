@@ -40,6 +40,7 @@ input {
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     height: 40px;
+    color: black;
 }
 .signIn {
     margin-top: 15px;
@@ -61,6 +62,7 @@ hr {
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     cursor: pointer;
+    color: black;
 }
 .blueButton {
     background: #1037AA;
