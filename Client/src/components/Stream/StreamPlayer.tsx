@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import JSMpeg from 'jsmpeg-player';
+/*import JSMpeg from 'jsmpeg-player';*/
 interface StreamPlayerProps {
   wsUrl: string;
 }
@@ -13,7 +13,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ wsUrl }) => {
     script.src = "/js/jsmpeg.min.js";
     script.onload = () => {
       // @ts-ignore
-      const player = new window.JSMpeg.Player(wsUrl, { canvas: canvasRef.current});
+      const player = new JSMpeg.Player(wsUrl, { canvas: canvasRef.current});
 
       return () => {
         player.destroy();

@@ -61,7 +61,7 @@ const HomePage: React.FC = () => {
             {activeStreams.map((camera, index) => (
               <div key={index} className="streamContainer">
                 {/*<StreamPlayer wsUrl={`wss://localhost:7034/${camera.id}`} />*/}
-                <StreamPlayer wsUrl={camera.wsUrl}/>
+                <StreamPlayer wsUrl={'ws://localhost:5003/stream/192.168.50.165'}/>
                 <button onClick={() => handleStopStream(camera)}>Stop Stream</button>
               </div>
             ))

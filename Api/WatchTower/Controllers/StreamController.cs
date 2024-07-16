@@ -20,12 +20,5 @@ public class StreamController (StreamService streamService)
 
         return Task.FromResult<IActionResult>(result.IsSuccess ? Ok(cameraDto.Ip) : BadRequest(result.ErrorMessage));
     }
-
-    [HttpGet("stop-stream")]
-    public IActionResult StopStream(string ip)
-    {
-        var result = streamService.StopStream(ip);
-        
-        return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
-    }
+    
 }

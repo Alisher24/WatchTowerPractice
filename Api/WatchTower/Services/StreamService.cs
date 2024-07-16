@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Xml.Linq;
+using WatchTower.Common;
 using WatchTower.Common.Result;
 
 namespace WatchTower.Services;
@@ -10,7 +10,11 @@ public class StreamService(
     IConfiguration configuration,
     ILogger<StreamService> logger)
 {
-    private static ConcurrentDictionary<string, Process> _ffmpegProcesses = new();
+    
+    private static readonly ConcurrentDictionary
+        <string, Ffmpeg> FfmpegProcesses = new();
+    private static readonly ConcurrentDictionary
+        <string, List<(WebSocket, CancellationToken)>> WebSockets = new();
 
     private Process StartFfmpeg(string streamUrl)
     {
@@ -34,8 +38,7 @@ public class StreamService(
                     CreateNoWindow = true
                 }
             };
-
-            process.Start();
+            
             logger.LogInformation("FFmpeg process started.");
             return process;
         }
@@ -51,10 +54,13 @@ public class StreamService(
     {
         try
         {
-            if (!_ffmpegProcesses.ContainsKey(ip))
+            if (!FfmpegProcesses.ContainsKey(ip))
             {
-                var ffmpegProces = StartFfmpeg(url);
-                var status = _ffmpegProcesses.TryAdd(ip, ffmpegProces);
+                Ffmpeg ffmpeg = new Ffmpeg()
+                {
+                    FfmpegProcess = StartFfmpeg(url)
+                };
+                var status = FfmpegProcesses.TryAdd(ip, ffmpeg);
                 logger.LogInformation("Add status ffmpeg process {status}", status);
             }
 
@@ -72,51 +78,73 @@ public class StreamService(
         }
     }
 
-    public BaseResult<string> StopStream(string ip)
+    private async Task StreamingVideoForAll(string ip)
     {
-        if (_ffmpegProcesses.ContainsKey(ip))
-        {
-            _ffmpegProcesses[ip].Kill();
-            logger.LogInformation("FFmpeg process stopped.");
-            _ffmpegProcesses.TryRemove(ip, out _);
-            return new BaseResult<string>()
-            {
-                Data = "Stream stopped"
-            };
-        }
-
-        return new BaseResult<string>()
-        {
-            ErrorMessage = "No stream to stop"
-        };
-    }
-
-    public async Task StreamVideo(WebSocket webSocket, CancellationToken cancellationToken, string ip)
-    {
-        var buffer = new byte[30720];
-
         try
         {
+            var output = FfmpegProcesses[ip]
+                .FfmpegProcess.StandardOutput.BaseStream;
+            logger.LogInformation("Ffmpeg process status = {status}",
+                output.CanRead);
 
-            var output = _ffmpegProcesses[ip].StandardOutput.BaseStream;
-            logger.LogInformation("Ffmpeg process status = {status}", output.CanRead);
-
-            int bytesRead;
-
-            logger.LogInformation("bytesRead = {b}",
-                await output.ReadAsync(buffer, 0, buffer.Length, cancellationToken) > 0);
-
-            while ((bytesRead = await output.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+            while ((FfmpegProcesses[ip].BytesRead = await output.ReadAsync(
+                       FfmpegProcesses[ip].Buffer, 0,
+                       FfmpegProcesses[ip].Buffer.Length)) > 0)
             {
-                if (webSocket.State == WebSocketState.Closed || cancellationToken.IsCancellationRequested)
+
+                foreach (var valueTuple in WebSockets[ip])
                 {
-                    logger.LogInformation("webSocket.State = {state} and cancellation token = {token}", webSocket.State,
-                        cancellationToken.IsCancellationRequested);
-                    break;
+                    await valueTuple.Item1.SendAsync(new ArraySegment<byte>(
+                            FfmpegProcesses[ip].Buffer, 0,
+                            FfmpegProcesses[ip].BytesRead),
+                        WebSocketMessageType.Binary,
+                        true, valueTuple.Item2);
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "");
+        }
+        finally
+        {
+            FfmpegProcesses[ip].Status = false;
+        }
+
+    }
+
+    public async Task StreamVideo(
+        WebSocket webSocket, CancellationToken cancellationToken, string ip)
+    {
+        try
+        {
+            FfmpegProcesses[ip].Listeners++;
+            var startStatus = true;
+            if (WebSockets.ContainsKey(ip))
+            {
+                logger.LogInformation("listeners: {listeners}", FfmpegProcesses[ip].Listeners);
+                WebSockets[ip].Add((webSocket, cancellationToken));
+                while (!cancellationToken.IsCancellationRequested && FfmpegProcesses[ip].Status)
+                {
+                    
                 }
 
-                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), WebSocketMessageType.Binary,
-                    true, cancellationToken);
+                startStatus = false;
+
+            }
+            else
+            {
+                WebSockets.TryAdd(ip, [(webSocket, cancellationToken)]);
+            }
+            if (FfmpegProcesses[ip].Status == false)
+            {
+                if (startStatus)
+                {
+                    FfmpegProcesses[ip].FfmpegProcess.Start();
+                }
+                FfmpegProcesses[ip].Status = true;
+                await StreamingVideoForAll(ip);
             }
         }
         catch (Exception ex)
@@ -125,8 +153,25 @@ public class StreamService(
         }
         finally
         {
-            logger.LogInformation("Stop stream");
-            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Stream ended", cancellationToken);
+            if (WebSockets.ContainsKey(ip))
+            {
+                WebSockets[ip].Remove((webSocket, cancellationToken));
+                if (WebSockets[ip].Count == 0)
+                {
+                    WebSockets.Remove(ip, out _);
+                    logger.LogInformation("websocket closed");
+                }
+            }
+            if (FfmpegProcesses.ContainsKey(ip))
+            {
+                FfmpegProcesses[ip].Listeners--;
+                logger.LogInformation("listeners: {listeners}", FfmpegProcesses[ip].Listeners);
+                if (FfmpegProcesses[ip].Listeners == 0)
+                {
+                    FfmpegProcesses[ip].FfmpegProcess.Kill();
+                    FfmpegProcesses.Remove(ip, out _);
+                }
+            }
         }
     }
 }
