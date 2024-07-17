@@ -182,6 +182,6 @@ public class StreamService(
         var ipCamera = await dbContext.Cameras
             .Where(c => c.UserId == userId)
             .FirstOrDefaultAsync(c => c.Id == id);
-        return ipCamera!.Ip;
+        return ipCamera?.Ip;
     }
 }

@@ -54,7 +54,7 @@ namespace WatchTower.Controllers
                 return BadRequest(new { message = "Введите пароль" });
             }
 
-            User userToRegister = new(name: user.Name, email: user.Email, password: user.Password);
+            User userToRegister = new(user.Name, user.Email, user.Password);
 
             var registerUser = await authService.Register(userToRegister);
 

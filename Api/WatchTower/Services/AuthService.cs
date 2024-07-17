@@ -22,7 +22,7 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         }
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(configuration["JWT:SecretKey"]);
+        var key = Encoding.ASCII.GetBytes(configuration["JWT:SecretKey"]!);
 
         var tokenDescription = new SecurityTokenDescriptor
         {

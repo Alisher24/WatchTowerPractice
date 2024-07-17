@@ -32,25 +32,57 @@ public class CameraController(CameraService cameraService) : ControllerBase
         var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         
         var cameras = await cameraService.GetCamerasAsync(userId);
+        
         if (cameras.IsSuccess)
         {
+            if (cameras.Data.Count == 0)
+            {
+                return NoContent();
+            }
             return Ok(cameras.Data);
         }
 
         return BadRequest(cameras.ErrorMessage);
     }
 
-    [HttpGet("get-camera-by-ip")]
-    public async Task<IActionResult> GetCameraByIp([FromBody] string ip)
+    [HttpGet("get-camera-by-name{name}")]
+    public async Task<IActionResult> GetCameraByName(string name)
     {
         var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         
-        var camera = await cameraService.GetCameraByIpAsync(ip, userId);
+        var camera = await cameraService.GetCameraByNameAsync(name, userId);
+        
         if (camera.IsSuccess)
         {
             return Ok(camera.Data);
         }
 
         return BadRequest(camera.ErrorMessage);
+    }
+
+    [HttpPut("update-camera")]
+    public async Task<IActionResult> UpdateCameraAsync([FromBody] CameraDto dto)
+    {
+        var result = await cameraService.UpdateCameraAsync(dto);
+        
+        if (result.IsSuccess)
+        {
+            return Ok();
+        }
+
+        return BadRequest(result.ErrorMessage);
+    }
+
+    [HttpDelete("delete-camera/{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await cameraService.DeleteCameraAsync(id);
+        
+        if (result.IsSuccess)
+        {
+            return Ok();
+        }
+
+        return BadRequest(result.ErrorMessage);
     }
 }

@@ -4,7 +4,7 @@
     {
         public bool IsSuccess => ErrorMessage == null;
 
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; init; }
 
     }
 
@@ -18,6 +18,6 @@
 
         public BaseResult() { }
 
-        public T Data { get; set; }
+        public T? Data { get; set; }
     }
 }
