@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5003/';
+const API_URL = 'http://192.168.50.101:5003/';
 const token = localStorage.getItem('token')?.slice(1).slice(0, -1);
+axios.defaults.headers.common['Authorization'] = "Bearer " + token;
 
 const register = (email, name, password) => axios.post(`${API_URL}auth/Register`, {
   email: email,
@@ -14,9 +15,9 @@ const register = (email, name, password) => axios.post(`${API_URL}auth/Register`
   return response.data;
 });
 
-const login = (name, password) => axios
+const login = (email, password) => axios
   .post(`${API_URL}auth/Login`, {
-    name: name,
+    email: email,
     password: password,
   })
   .then((response) => {
@@ -24,6 +25,7 @@ const login = (name, password) => axios
     console.log(response.data.data.jwtToken);
     if (response.data.data.jwtToken) {
       localStorage.setItem('token', JSON.stringify(response.data.data.jwtToken));
+      axios.defaults.headers.common['Authorization'] = "Bearer " + localStorage.getItem('token')?.slice(1).slice(0, -1);
     }
     return response.data;
   })
@@ -34,22 +36,56 @@ const login = (name, password) => axios
 
 
 const getCameras = () => {
-  return axios.get(`${API_URL}camera/get-cameras`, {
-    headers: { Authorization: `Bearer ${token}` }
+  return axios.get(`${API_URL}camera/get-cameras`);
+};
+
+const registerCamera = (ip: string, name: string, username: string, password: string) => {
+  console.log(`Bearer ${token}`)
+  return axios.post(`${API_URL}camera/register-camera`, {name, ip, username, password})
+};
+
+const startStream = (ip: string, name: string, password: string) =>
+  axios.post(`${API_URL}stream/start-stream`, {ip, name, password},
+  ).then((response) => {
+    console.log(response);
+    console.log(response.data.data);
+    return response.data;
+  }).catch((error) => {
+    console.error("Start stream error: ", error);
+    throw error;
+  });
+
+const updateCamera = (updatedCamera: { name: string; id: number; title: string; ip: string; password: string; }) => {
+  console.log(updatedCamera)
+  return axios.put(`${API_URL}camera/update-camera`, {
+    id: updatedCamera.id,
+    name: updatedCamera.title,
+    ip: updatedCamera.ip,
+    password: updatedCamera.password,
+      userName: updatedCamera.name,
+    },
+  ).then((response) => {
+    console.log(response);
+    console.log(response.data.data);
+    return response.data;
+  }).catch((error) => {
+    console.error("error: ", error);
+    throw error;
   });
 };
+const deleteCamera = (id: number) =>
+  axios.delete(`${API_URL}camera/delete-camera/${id}`).then((response) => {
+    console.log(response);
+    console.log(response.data.data);
+    return response.data;
+  }).catch((error) => {
+    console.error("error: ", error);
+    throw error;
+  });
 
-const registerCamera = (title: string, ip: string, name: string, password: string) => {
-  console.log(`Bearer ${token}`)
-  return axios.post(`${API_URL}camera/register-camera`, { ip, name, password }, {
-    headers: { Authorization: `Bearer ${token}`}
-  })
-};
-
-const startStream = (ip: string, name: string, password: string) => 
-  axios.post(`${API_URL}stream/start-stream`, { ip, name, password }, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then((response) => {
+const startStreamByID = (id: string) =>
+  axios.get(`${API_URL}stream/${id}`,
+  ).then((response) => {
     console.log(response);
     console.log(response.data.data);
     return response.data;
@@ -61,28 +97,7 @@ const startStream = (ip: string, name: string, password: string) =>
 const stopStream = () => {
   return axios.get(`${API_URL}stream/stop-stream`)
 }
-const updateCamera = (id: number, updatedCamera: { title: string;  id: number;  name: string;  ip: string;  password: string;}) => 
-  axios.post(`${API_URL}camera/update-camera`, { id, updatedCamera }, {
-  headers: { Authorization: `Bearer ${token}` }
-}).then((response) => {
-  console.log(response);
-  console.log(response.data.data);
-  return response.data;
-}).catch((error) => {
-  console.error("error: ", error);
-  throw error;
-});
-const DeleteCamera = (id: number) => 
-  axios.post(`${API_URL}camera/delete-camera`, { id }, {
-  headers: { Authorization: `Bearer ${token}` }
-}).then((response) => {
-  console.log(response);
-  console.log(response.data.data);
-  return response.data;
-}).catch((error) => {
-  console.error("error: ", error);
-  throw error;
-});
+
 
 export default {
   register,
@@ -90,7 +105,8 @@ export default {
   getCameras,
   registerCamera,
   startStream,
+  startStreamByID,
   stopStream,
   updateCamera,
-  deleteCamera: DeleteCamera
+  deleteCamera,
 };

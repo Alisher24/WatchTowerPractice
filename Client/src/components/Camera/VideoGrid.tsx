@@ -14,6 +14,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ activeStreams, handleStopStream }
 
   const toggleSettings = () => {
     setShowSettings(!showSettings);
+    console.log(activeStreams)
   };
 
   const handleColumnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +46,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ activeStreams, handleStopStream }
       >
         {activeStreams.map((camera, index) => (
           <div key={index} className="streamContainer">
-            <StreamPlayer wsUrl={`ws://localhost:5003/${camera.id}`} /> {/* FIXME: send token wia ws */}
+            <StreamPlayer wsUrl={`ws://192.168.50.101:5003/stream/${camera.id}?token=${localStorage.getItem("token")?.slice(1).slice(0, -1)}`} /> {/* FIXME: send token wia ws */}
             <button
               type="button"
               className="btn-close"

@@ -61,6 +61,15 @@ import {BrowserRouter} from 'react-router-dom';
 import GlobalStyles from './shared/GlobalStyles';
 import React from "react";
 
+// const script = document.createElement("script");
+// script.innerText = "XMLHttpRequest.prototype.open = (function(open) {\n" +
+//   "  return function(method,url,async) {\n" +
+//   "    open.apply(this,arguments);\n" +
+//   "    this.setRequestHeader('customHeader1', 'someValue');\n" +
+//   "    this.setRequestHeader('customHeader2', 'someOtherValue');\n" +
+//   "    };\n" +
+//   "})(XMLHttpRequest.prototype.open);"
+// document.body.appendChild(script);
 const App: React.FC = () => {
   return (
     <div className="App">
@@ -70,7 +79,9 @@ const App: React.FC = () => {
           <Routes/>
         </Main>
       </BrowserRouter>
+      
     </div>
+    
   );
 };
 

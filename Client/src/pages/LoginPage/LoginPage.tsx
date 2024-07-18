@@ -10,7 +10,7 @@ const LoginPage = () => {
   const history = useHistory();
   const [loginError, setLoginError] = useState(false);
   const handleSubmit = () => {
-    AuthService.login(username, password).then(
+    AuthService.login(email, password).then(
       () => {
         history.push("/");
       },
@@ -18,7 +18,7 @@ const LoginPage = () => {
       setLoginError(true)
     });
   };
-  const [username, setUsername] = useState();
+  const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -32,10 +32,10 @@ const LoginPage = () => {
     }
   }, [usernameError, passwordError])
 
-  const usernameHandler = (e) => {
-    setUsername(e.target.value)
+  const emailHandler = (e) => {
+    setEmail(e.target.value)
     if (!e.target.value) {
-      setUsernameError('Имя пользователя не может быть пустым')
+      setUsernameError('Email не может быть пустым')
     } else {
       setUsernameError('')
     }
@@ -59,13 +59,13 @@ const LoginPage = () => {
         {/*<Link to="/"><Logo className="logotype"/></Link>*/}
         <div className="inputWrapper">
           <StyledInput
-            onChange={usernameHandler}
+            onChange={emailHandler}
             error={usernameError}
-            id={'username'}
-            name={'username'}
-            value={username}
+            id={'email'}
+            name={'email'}
+            value={email}
             type={'text'}
-            textLabel={'Username'}
+            textLabel={'Email'}
             required
           />
           <StyledInput
