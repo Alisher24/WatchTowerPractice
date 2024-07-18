@@ -53,10 +53,17 @@ public class StreamService(
         }
     }
 
-    public BaseResult<string> FfmpegStarter(string url, string ip)
+    public async Task<BaseResult<string>> FfmpegStarter(int id)
     {
         try
         {
+            var camera = await dbContext.Cameras
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            var ip = camera!.Ip;
+            var url = camera.UserName == null ? $"rtsp://{camera.Ip}" 
+                : $"rtsp://{camera.UserName}:{camera.Password}@{camera.Ip}";
+            
             if (!FfmpegProcesses.ContainsKey(ip))
             {
                 Ffmpeg ffmpeg = new Ffmpeg()
@@ -177,7 +184,7 @@ public class StreamService(
         }
     }
 
-    public async Task<string> GetIpCameraAsync(int id, int userId)
+    public async Task<string?> GetIpCameraAsync(int id, int userId)
     {
         var ipCamera = await dbContext.Cameras
             .Where(c => c.UserId == userId)

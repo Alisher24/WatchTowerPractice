@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -99,19 +100,5 @@ app.UseCors("MyConfiguration");
 app.UseWebSockets();
 
 app.MapControllers();
-
-/*app.Map("/stream/{ip}", async (HttpContext context, StreamService service, CancellationToken ct, string ip) =>
-{
-    if (context.WebSockets.IsWebSocketRequest)
-    {
-        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        Console.WriteLine(ip);
-        await service.StreamVideo(webSocket, ct, ip);
-    }
-    else
-    {
-        context.Response.StatusCode = 400;
-    }
-});*/
 
 app.Run();

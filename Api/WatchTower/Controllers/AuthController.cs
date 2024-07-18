@@ -15,7 +15,7 @@ namespace WatchTower.Controllers
         [HttpPost ("Login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto user)
         {
-            var loggedInUser = await authService.Login(user.Name, user.Password);
+            var loggedInUser = await authService.Login(user.Email, user.Password);
 
             return Ok(loggedInUser);
         }

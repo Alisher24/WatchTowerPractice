@@ -35,7 +35,7 @@ public class CameraController(CameraService cameraService) : ControllerBase
         
         if (cameras.IsSuccess)
         {
-            if (cameras.Data.Count == 0)
+            if (cameras.Data?.Count == 0)
             {
                 return NoContent();
             }
@@ -69,6 +69,7 @@ public class CameraController(CameraService cameraService) : ControllerBase
         {
             return Ok();
         }
+        Console.WriteLine(result.ErrorMessage);
 
         return BadRequest(result.ErrorMessage);
     }

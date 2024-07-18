@@ -12,9 +12,9 @@ namespace WatchTower.Services;
 
 public class AuthService(WatchTowerDbContext dbContext, IConfiguration configuration)
 {
-    public async Task<BaseResult<UserDto>?> Login(string name, string password)
+    public async Task<BaseResult<UserDto>?> Login(string email, string password)
     {
-        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == name);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
 
         if (user == null || BCrypt.Net.BCrypt.Verify(password, user.Password) == false) 
         {
@@ -55,6 +55,14 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
         dbContext.Users.Add(user);
         await dbContext.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User?> GetUserWithToken(string token)
+    {
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(x => x.Token == token);
 
         return user;
     }
