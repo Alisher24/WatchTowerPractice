@@ -12,8 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<WatchTowerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<AuthService>();
-
 builder.Services.AddScoped<CameraService>();
 builder.Services.AddScoped<StreamService>();
 
@@ -47,12 +47,16 @@ builder.Services.AddAuthentication(opt => {
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!))
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("admin"));
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Pathnostics", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "WatchTower", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -85,13 +89,12 @@ builder.Logging.AddConsole();
 var app = builder.Build();
 
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("MyConfiguration");
-
-app.UseAuthorization();
 
 app.UseWebSockets();
 

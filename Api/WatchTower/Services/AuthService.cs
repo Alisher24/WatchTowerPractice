@@ -29,7 +29,8 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
             Subject = new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
             }),
             IssuedAt = DateTime.UtcNow,
             Issuer = configuration["JWT:Issuer"],
