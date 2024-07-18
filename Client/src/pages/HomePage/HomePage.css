@@ -1,6 +1,6 @@
 .homePage {
     display: flex;
-    --sidebar-width: 160px;
+    --sidebar-width: 175px;
     width: 100vw;
 }
 

@@ -70,9 +70,9 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
-    background-color: #f9f9f9;
-  }
+  /*button {*/
+  /*  background-color: #f9f9f9;*/
+  /*}*/
 }
 
 /*!* Дополним стили для кнопок и инпутов, используемых в боковой панели *!*/
