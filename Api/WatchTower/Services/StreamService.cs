@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using WatchTower.Common;
 using WatchTower.Common.Result;
 using WatchTower.Database;
@@ -15,20 +16,23 @@ public class StreamService(
 {
     
     private static readonly ConcurrentDictionary
-        <string, Ffmpeg> FfmpegProcesses = new();
+        <string, Ffmpeg> _ffmpegProcesses = new();
     private static readonly ConcurrentDictionary
-        <string, List<(WebSocket, CancellationToken)>> WebSockets = new();
+        <string, List<(WebSocket, CancellationToken)>> _webSockets = new();
+    private readonly ILogger<StreamService> _logger = logger;
+    private readonly IConfiguration _configuration = configuration;
+
 
     private Process StartFfmpeg(string streamUrl)
     {
-        logger.LogInformation("Received request to start stream with URL: {StreamUrl}", streamUrl);
+        _logger.LogInformation("Received request to start stream with URL: {StreamUrl}", streamUrl);
 
         try
         {
-            var ffmpegPath = configuration["FFMPEG:Path"];
+            var ffmpegPath = _configuration["FFMPEG:Path"];
 
             var arguments = $"-i {streamUrl} -f mpegts -codec:v mpeg1video pipe:1";
-            logger.LogInformation("Starting FFmpeg process with arguments: {Arguments}", arguments);
+            _logger.LogInformation("Starting FFmpeg process with arguments: {Arguments}", arguments);
 
             var process = new Process
             {
@@ -41,14 +45,13 @@ public class StreamService(
                     CreateNoWindow = true
                 }
             };
-            
-            logger.LogInformation("FFmpeg process started.");
+
+            _logger.LogInformation("FFmpeg process started.");
             return process;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            logger.LogError(ex, "");
+            _logger.LogError(ex, "");
             throw;
         }
     }
@@ -61,17 +64,17 @@ public class StreamService(
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             var ip = camera!.Ip;
-            var url = camera.UserName == null ? $"rtsp://{camera.Ip}" 
-                : $"rtsp://{camera.UserName}:{camera.Password}@{camera.Ip}";
+            var url = camera.Name.IsNullOrEmpty() ? $"rtsp://{camera.Ip}" 
+                : $"rtsp://{camera.Name}:{camera.Password}@{camera.Ip}";
             
-            if (!FfmpegProcesses.ContainsKey(ip))
+            if (!_ffmpegProcesses.ContainsKey(ip))
             {
                 Ffmpeg ffmpeg = new Ffmpeg()
                 {
                     FfmpegProcess = StartFfmpeg(url)
                 };
-                var status = FfmpegProcesses.TryAdd(ip, ffmpeg);
-                logger.LogInformation("Add status ffmpeg process {status}", status);
+                var status = _ffmpegProcesses.TryAdd(ip, ffmpeg);
+                _logger.LogInformation("Add status ffmpeg process {status}", status);
             }
 
             return new BaseResult<string>()
@@ -92,21 +95,21 @@ public class StreamService(
     {
         try
         {
-            var output = FfmpegProcesses[ip]
+            var output = _ffmpegProcesses[ip]
                 .FfmpegProcess.StandardOutput.BaseStream;
-            logger.LogInformation("Ffmpeg process status = {status}",
+            _logger.LogInformation("Ffmpeg process status = {status}",
                 output.CanRead);
 
-            while ((FfmpegProcesses[ip].BytesRead = await output.ReadAsync(
-                       FfmpegProcesses[ip].Buffer, 0,
-                       FfmpegProcesses[ip].Buffer.Length)) > 0)
+            while ((_ffmpegProcesses[ip].BytesRead = await output.ReadAsync(
+                       _ffmpegProcesses[ip].Buffer, 0,
+                       _ffmpegProcesses[ip].Buffer.Length)) > 0)
             {
 
-                foreach (var valueTuple in WebSockets[ip])
+                foreach (var valueTuple in _webSockets[ip])
                 {
                     await valueTuple.Item1.SendAsync(new ArraySegment<byte>(
-                            FfmpegProcesses[ip].Buffer, 0,
-                            FfmpegProcesses[ip].BytesRead),
+                            _ffmpegProcesses[ip].Buffer, 0,
+                            _ffmpegProcesses[ip].BytesRead),
                         WebSocketMessageType.Binary,
                         true, valueTuple.Item2);
                 }
@@ -115,11 +118,11 @@ public class StreamService(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "");
+            _logger.LogError(e, "");
         }
         finally
         {
-            FfmpegProcesses[ip].Status = false;
+            _ffmpegProcesses[ip].Status = false;
         }
     }
 
@@ -128,13 +131,13 @@ public class StreamService(
     {
         try
         {
-            FfmpegProcesses[ip].Listeners++;
+            _ffmpegProcesses[ip].Listeners++;
             var startStatus = true;
-            if (WebSockets.ContainsKey(ip))
+            if (_webSockets.ContainsKey(ip))
             {
-                logger.LogInformation("listeners: {listeners}", FfmpegProcesses[ip].Listeners);
-                WebSockets[ip].Add((webSocket, cancellationToken));
-                while (!cancellationToken.IsCancellationRequested && FfmpegProcesses[ip].Status)
+                _logger.LogInformation("listeners: {listeners}", _ffmpegProcesses[ip].Listeners);
+                _webSockets[ip].Add((webSocket, cancellationToken));
+                while (!cancellationToken.IsCancellationRequested && _ffmpegProcesses[ip].Status)
                 {
                     
                 }
@@ -144,41 +147,41 @@ public class StreamService(
             }
             else
             {
-                WebSockets.TryAdd(ip, [(webSocket, cancellationToken)]);
+                _webSockets.TryAdd(ip, [(webSocket, cancellationToken)]);
             }
-            if (FfmpegProcesses[ip].Status == false)
+            if (_ffmpegProcesses[ip].Status == false)
             {
                 if (startStatus)
                 {
-                    FfmpegProcesses[ip].FfmpegProcess.Start();
+                    _ffmpegProcesses[ip].FfmpegProcess.Start();
                 }
-                FfmpegProcesses[ip].Status = true;
+                _ffmpegProcesses[ip].Status = true;
                 await StreamingVideoForAll(ip);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "");
+            _logger.LogError(ex, "");
         }
         finally
         {
-            if (WebSockets.ContainsKey(ip))
+            if (_webSockets.ContainsKey(ip))
             {
-                WebSockets[ip].Remove((webSocket, cancellationToken));
-                if (WebSockets[ip].Count == 0)
+                _webSockets[ip].Remove((webSocket, cancellationToken));
+                if (_webSockets[ip].Count == 0)
                 {
-                    WebSockets.Remove(ip, out _);
-                    logger.LogInformation("websocket closed");
+                    _webSockets.Remove(ip, out _);
+                    _logger.LogInformation("websocket closed");
                 }
             }
-            if (FfmpegProcesses.ContainsKey(ip))
+            if (_ffmpegProcesses.ContainsKey(ip))
             {
-                FfmpegProcesses[ip].Listeners--;
-                logger.LogInformation("listeners: {listeners}", FfmpegProcesses[ip].Listeners);
-                if (FfmpegProcesses[ip].Listeners == 0)
+                _ffmpegProcesses[ip].Listeners--;
+                _logger.LogInformation("listeners: {listeners}", _ffmpegProcesses[ip].Listeners);
+                if (_ffmpegProcesses[ip].Listeners == 0)
                 {
-                    FfmpegProcesses[ip].FfmpegProcess.Kill();
-                    FfmpegProcesses.Remove(ip, out _);
+                    _ffmpegProcesses[ip].FfmpegProcess.Kill();
+                    _ffmpegProcesses.Remove(ip, out _);
                 }
             }
         }

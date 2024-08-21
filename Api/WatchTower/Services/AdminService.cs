@@ -5,13 +5,16 @@ using WatchTower.DTO;
 
 namespace WatchTower.Services;
 
-public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> logger)
+public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> _logger)
 {
+    private readonly WatchTowerDbContext _dbContext = dbContext;
+    private readonly ILogger<AdminService> _logger = _logger;
+
     public async Task<BaseResult<List<UserForAdminDto>>> GetUsersAsync()
     {
         try
         {
-            var users = await dbContext.Users
+            var users = await _dbContext.Users
                 .Select(x => new UserForAdminDto(
                     x.Id, x.Name, x.Email, x.Role))
                 .ToListAsync();
@@ -23,7 +26,7 @@ public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> l
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,"");
+            _logger.LogError(ex,"");
             return new BaseResult<List<UserForAdminDto>>()
             {
                 ErrorMessage = ex.Message
@@ -35,7 +38,7 @@ public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> l
     {
         try
         {
-            var user = await dbContext.Users
+            var user = await _dbContext.Users
                 .Include(user => user.Cameras)
                 .FirstOrDefaultAsync(x => x.Id == userId);
 
@@ -44,8 +47,8 @@ public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> l
                 {
                     Id = camera.Id,
                     Ip = camera.Ip,
+                    Title = camera.Title,
                     Name = camera.Name,
-                    UserName = camera.UserName,
                     Password = camera.Password
                 })
                 .ToList();
@@ -57,7 +60,7 @@ public class AdminService(WatchTowerDbContext dbContext, ILogger<AdminService> l
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "");
+            _logger.LogError(ex, "");
             return new BaseResult<List<CameraDto>>()
             {
                 ErrorMessage = ex.Message

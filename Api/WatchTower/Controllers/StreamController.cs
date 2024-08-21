@@ -12,16 +12,18 @@ namespace WatchTower.Controllers;
 public class StreamController (StreamService streamService, AuthService authService)
     : ControllerBase
 {
-   
+    private readonly StreamService _streamService = streamService;
+    private readonly AuthService _authService = authService;
+
     [HttpGet("{id}")]
     public async Task<IResult> WebSocketConnection(string id, [FromQuery] string token)
     {
-        var user = await authService.GetUserWithToken(token);
+        var user = await _authService.GetUserWithToken(token);
         if (user == null)
         {
             return Results.Unauthorized();
         }
-        var ffmpeg = await streamService.FfmpegStarter(int.Parse(id));
+        var ffmpeg = await _streamService.FfmpegStarter(int.Parse(id));
         var context = HttpContext;
         try
         {
@@ -30,12 +32,12 @@ public class StreamController (StreamService streamService, AuthService authServ
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 Console.WriteLine(id);
                 /*var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);*/
-                var ip = await streamService.GetIpCameraAsync(int.Parse(id), user.Id);
+                var ip = await _streamService.GetIpCameraAsync(int.Parse(id), user.Id);
                 if (ip.IsNullOrEmpty())
                 {
                     return Results.NoContent();
                 }
-                await streamService.StreamVideo(webSocket, context.RequestAborted, ip);
+                await _streamService.StreamVideo(webSocket, context.RequestAborted, ip);
                 
                 return Results.Ok();
             }

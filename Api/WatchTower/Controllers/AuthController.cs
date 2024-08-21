@@ -11,11 +11,13 @@ namespace WatchTower.Controllers
     [Route("auth")]
     public class AuthController(AuthService authService) : ControllerBase
     {
+        private readonly AuthService _authService = authService;
+
         [AllowAnonymous]
         [HttpPost ("Login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto user)
         {
-            var loggedInUser = await authService.Login(user.Email, user.Password);
+            var loggedInUser = await _authService.Login(user.Email, user.Password);
 
             return Ok(loggedInUser);
         }
@@ -26,7 +28,7 @@ namespace WatchTower.Controllers
         {
             User userToRegister = new(user.Name, user.Email, user.Password);
 
-            var registerUser = await authService.Register(userToRegister);
+            var registerUser = await _authService.Register(userToRegister);
 
             return Ok(registerUser);
         }

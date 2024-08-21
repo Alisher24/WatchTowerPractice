@@ -8,18 +8,19 @@ namespace WatchTower.Services;
 
 public class CameraService(WatchTowerDbContext dbContext)
 {
+    private readonly WatchTowerDbContext _dbContext = dbContext;
     public async Task<BaseResult<List<CameraDto>>> GetCamerasAsync(int userId)
     {
         try
         {
-            var cameras = await dbContext.Cameras
+            var cameras = await _dbContext.Cameras
                 .Where(x => x.UserId == userId)
                 .Select(s => new CameraDto()
                 {
                     Id = s.Id,
                     Ip = s.Ip,
+                    Title = s.Title,
                     Name = s.Name,
-                    UserName = s.UserName,
                     Password = s.Password
                 })
                 .ToListAsync();
@@ -38,19 +39,19 @@ public class CameraService(WatchTowerDbContext dbContext)
         }
     }
 
-    public async Task<BaseResult<CameraDto>> GetCameraByNameAsync(string name, int userId)
+    public async Task<BaseResult<CameraDto>> GetCameraByNameAsync(string title, int userId)
     {
         try
         {
-            var camera = await dbContext.Cameras
+            var camera = await _dbContext.Cameras
                 .Where(x => x.UserId == userId)
-                .FirstOrDefaultAsync(x => x.Name == name);
+                .FirstOrDefaultAsync(x => x.Title == title);
             
             if (camera == null)
             {
                 return new BaseResult<CameraDto>
                 {
-                    ErrorMessage = $"Camera with ip: {name} not found"
+                    ErrorMessage = $"Camera with title: {title} not found"
                 };
             }
 
@@ -58,8 +59,8 @@ public class CameraService(WatchTowerDbContext dbContext)
             {
                 Id = camera.Id,
                 Ip = camera.Ip,
+                Title = camera.Title,
                 Name = camera.Name,
-                UserName = camera.UserName,
                 Password = camera.Password
             };
 
@@ -83,15 +84,15 @@ public class CameraService(WatchTowerDbContext dbContext)
         {
             var camera = new Camera()
             {
-                UserName = cameraDto.UserName,
+                Title = cameraDto.Title,
                 Ip = cameraDto.Ip,
                 Name = cameraDto.Name,
                 Password = cameraDto.Password,
                 UserId = userId
             };
 
-            await dbContext.AddAsync(camera);
-            await dbContext.SaveChangesAsync();
+            await _dbContext.AddAsync(camera);
+            await _dbContext.SaveChangesAsync();
 
             return new BaseResult<CameraDto>
             {
@@ -111,18 +112,18 @@ public class CameraService(WatchTowerDbContext dbContext)
     {
         try
         {
-            var camera = await dbContext.Cameras
+            var camera = await _dbContext.Cameras
                 .FirstOrDefaultAsync(x => x.Id == cameraDto.Id);
 
             if (camera != null)
             {
+                camera.Title = cameraDto.Title;
                 camera.Name = cameraDto.Name;
-                camera.UserName = cameraDto.UserName;
                 camera.Ip = cameraDto.Ip;
                 camera.Password = cameraDto.Password;
                 
-                dbContext.Update(camera);
-                await dbContext.SaveChangesAsync();
+                _dbContext.Update(camera);
+                await _dbContext.SaveChangesAsync();
             }
 
             return new BaseResult();
@@ -140,13 +141,13 @@ public class CameraService(WatchTowerDbContext dbContext)
     {
         try
         {
-            var camera = await dbContext.Cameras
+            var camera = await _dbContext.Cameras
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (camera != null)
             {
-                dbContext.Remove(camera);
-                await dbContext.SaveChangesAsync();
+                _dbContext.Remove(camera);
+                await _dbContext.SaveChangesAsync();
             }
 
             return new BaseResult();

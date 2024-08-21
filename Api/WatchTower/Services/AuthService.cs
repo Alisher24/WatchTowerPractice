@@ -12,9 +12,12 @@ namespace WatchTower.Services;
 
 public class AuthService(WatchTowerDbContext dbContext, IConfiguration configuration)
 {
+    private readonly WatchTowerDbContext _dbContext = dbContext;
+    private readonly IConfiguration _configuration = configuration;
+
     public async Task<BaseResult<UserDto>?> Login(string email, string password)
     {
-        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
 
         if (user == null || BCrypt.Net.BCrypt.Verify(password, user.Password) == false) 
         {
@@ -22,7 +25,7 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         }
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(configuration["JWT:SecretKey"]!);
+        var key = Encoding.ASCII.GetBytes(_configuration["JWT:SecretKey"]!);
 
         var tokenDescription = new SecurityTokenDescriptor
         {
@@ -33,8 +36,8 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
                 new Claim(ClaimTypes.Role, user.Role)
             }),
             IssuedAt = DateTime.UtcNow,
-            Issuer = configuration["JWT:Issuer"],
-            Audience = configuration["JWT:Audience"],
+            Issuer = _configuration["JWT:Issuer"],
+            Audience = _configuration["JWT:Audience"],
             Expires = DateTime.UtcNow.AddDays(1),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
@@ -42,7 +45,7 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
         var token = tokenHandler.CreateToken(tokenDescription);
         user.Token = tokenHandler.WriteToken(token);
         user.IsActive = true;
-        await dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
         
         return new BaseResult<UserDto>()
         {
@@ -53,15 +56,15 @@ public class AuthService(WatchTowerDbContext dbContext, IConfiguration configura
     public async Task<User> Register(User user)
     {
         user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-        dbContext.Users.Add(user);
-        await dbContext.SaveChangesAsync();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
 
         return user;
     }
 
     public async Task<User?> GetUserWithToken(string token)
     {
-        var user = await dbContext.Users
+        var user = await _dbContext.Users
             .FirstOrDefaultAsync(x => x.Token == token);
 
         return user;

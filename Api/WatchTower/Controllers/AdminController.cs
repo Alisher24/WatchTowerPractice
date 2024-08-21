@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WatchTower.Services;
 
@@ -10,10 +9,12 @@ namespace WatchTower.Controllers;
 [Route("admin")]
 public class AdminController(AdminService adminService): ControllerBase
 {
+    private readonly AdminService _adminService = adminService;
+
     [HttpGet("get-users")]
     public async Task<IActionResult> GetUsers()
     {
-        var users = await adminService.GetUsersAsync();
+        var users = await _adminService.GetUsersAsync();
 
         if (users.IsSuccess)
         {
@@ -31,7 +32,7 @@ public class AdminController(AdminService adminService): ControllerBase
     [HttpGet("get-user-cameras")]
     public async Task<IActionResult> GetUserCameras(int userId)
     {
-        var cameras = await adminService.GetUserCamerasAsync(userId);
+        var cameras = await _adminService.GetUserCamerasAsync(userId);
         
         if (cameras.IsSuccess)
         {
