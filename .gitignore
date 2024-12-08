@@ -145,3 +145,4 @@ dist-ssr
 *.sw?
 /.gitignore
 
+/Api/WatchTower.Shodan/WatchTower.Shodan.csproj

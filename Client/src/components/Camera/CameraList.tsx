@@ -35,7 +35,7 @@ const CameraList: React.FC<CameraListProps> = ({onStartStream, onStopStream}) =>
       .then(response => {
         if (response.status === 204) return setCameras([]);
         const data = response.data.map(camera => {
-          camera.title = camera.userName;
+          camera.title = camera.title;
           return camera;
         })
         setCameras(data);
