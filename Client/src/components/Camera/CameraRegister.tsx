@@ -14,7 +14,7 @@ const CameraRegister: React.FC = () => {
     setRegisterMode(!registerMode);
   };
   const handleRegister = () => {
-    apiService.registerCamera(ip, name, title, password)
+    apiService.registerCamera(title, ip, name, password)
       .then(response => {
         setSuccess('Camera registered successfully');
         setError('');

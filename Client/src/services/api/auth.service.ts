@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.50.101:5003/';
+const API_URL = 'http://localhost:5003/';
 const token = localStorage.getItem('token')?.slice(1).slice(0, -1);
 axios.defaults.headers.common['Authorization'] = "Bearer " + token;
 
@@ -39,9 +39,9 @@ const getCameras = () => {
   return axios.get(`${API_URL}camera/get-cameras`);
 };
 
-const registerCamera = (ip: string, name: string, username: string, password: string) => {
+const registerCamera = (title: string, ip: string, name: string, password: string) => {
   console.log(`Bearer ${token}`)
-  return axios.post(`${API_URL}camera/register-camera`, {name, ip, username, password})
+  return axios.post(`${API_URL}camera/register-camera`, {title, ip, name, password})
 };
 
 const startStream = (ip: string, name: string, password: string) =>
@@ -59,10 +59,10 @@ const updateCamera = (updatedCamera: { name: string; id: number; title: string; 
   console.log(updatedCamera)
   return axios.put(`${API_URL}camera/update-camera`, {
     id: updatedCamera.id,
-    name: updatedCamera.title,
+    title: updatedCamera.title,
     ip: updatedCamera.ip,
     password: updatedCamera.password,
-      userName: updatedCamera.name,
+    name: updatedCamera.name,
     },
   ).then((response) => {
     console.log(response);
