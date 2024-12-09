@@ -144,6 +144,4 @@ dist-ssr
 *.sln
 *.sw?
 /.gitignore
-
-/Api/WatchTower.Shodan/WatchTower.Shodan.csproj
-WatchTower.Shodan
+TestShodan
