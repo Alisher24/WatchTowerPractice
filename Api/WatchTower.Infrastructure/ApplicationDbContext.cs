@@ -16,6 +16,8 @@ public class ApplicationDbContext(IConfiguration configuration) : DbContext
 
     public DbSet<Camera> Cameras => Set<Camera>();
 
+    public DbSet<ShodanCamera> ShodanCameras => Set<ShodanCamera>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString(DatabaseConnection));

@@ -61,6 +61,54 @@ namespace WatchTower.Infrastructure.Migrations
                     b.ToTable("cameras", (string)null);
                 });
 
+            modelBuilder.Entity("WatchTower.Domain.Entity.ShodanCamera", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city");
+
+                    b.Property<string>("CountryCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("country_code");
+
+                    b.Property<string>("CountryName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("country_name");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ip");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_shodan_cameras");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_shodan_cameras_user_id");
+
+                    b.ToTable("shodan_cameras", (string)null);
+                });
+
             modelBuilder.Entity("WatchTower.Domain.Entity.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -111,6 +159,18 @@ namespace WatchTower.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_cameras_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WatchTower.Domain.Entity.ShodanCamera", b =>
+                {
+                    b.HasOne("WatchTower.Domain.Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_shodan_cameras_users_user_id");
 
                     b.Navigation("User");
                 });

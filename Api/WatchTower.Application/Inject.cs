@@ -8,8 +8,10 @@ public static class Inject
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<AuthService>();
+        services.AddScoped<UserService>();
         services.AddScoped<CameraService>();
         services.AddScoped<StreamService>();
+        services.AddScoped<ShodanCameraService>();
 
         return services;
     }

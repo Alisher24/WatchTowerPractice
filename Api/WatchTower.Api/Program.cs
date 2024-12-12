@@ -44,7 +44,6 @@ builder.Services.AddAuthentication(opt =>
         };
     });
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {

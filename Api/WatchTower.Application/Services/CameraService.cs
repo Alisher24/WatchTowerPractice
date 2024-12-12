@@ -12,7 +12,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var cameras = userResult.Value.Cameras.Select(CameraDto.ToCameraDto).ToList();
@@ -26,7 +26,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var camera = userResult.Value.Cameras.FirstOrDefault(c => c.Id == cameraId);
@@ -42,7 +42,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var camera = userResult.Value.Cameras.FirstOrDefault(c => c.Title == title);
@@ -58,7 +58,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var cameraId = Guid.NewGuid();
@@ -80,7 +80,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var result = await repository.UpdateCameraAsync(userResult.Value, cameraDto, cancellationToken);
@@ -94,7 +94,7 @@ public class CameraService(BaseRepository repository)
         CancellationToken cancellationToken)
     {
         var userResult = await repository.GetByIdAsync(userId, cancellationToken);
-        if (!userResult.IsSuccess)
+        if (userResult.IsFailure)
             return userResult.ErrorList;
 
         var result = await repository.DeleteCameraAsync(userResult.Value, cameraId, cancellationToken);

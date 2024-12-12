@@ -10,6 +10,7 @@ public static class Inject
         services.AddDbContext<ApplicationDbContext>();
         services.AddSingleton<FfmpegProvider>();
         services.AddScoped<BaseRepository>();
+        services.AddScoped<ShodanProvider>();
 
         return services;
     }

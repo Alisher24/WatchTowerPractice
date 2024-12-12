@@ -13,7 +13,7 @@ public class AuthController(AuthService authService) : ApplicationController
     {
         var result = await authService.Login(user.Email, user.Password, cancellationToken);
         if (result.IsFailure)
-            result.ErrorList.ToResponse();
+            return result.ErrorList.ToResponse();
 
         return Ok(result);
     }
@@ -25,7 +25,7 @@ public class AuthController(AuthService authService) : ApplicationController
     {
         var result = await authService.Register(userRegistrationDto, cancellationToken);
         if (result.IsFailure)
-            result.ErrorList.ToResponse();
+            return result.ErrorList.ToResponse();
 
         return Ok(result);
     }
